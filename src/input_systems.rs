@@ -1,11 +1,7 @@
 use crate::*;
 
 /// Handles input when in the menu.
-fn menu_input(
-    input_state: Res<InputState>,
-    mut menu: ResMut<MenuState>,
-    mut app_exit: EventWriter<AppExit>,
-) {
+fn menu_input(input_state: Res<InputState>, mut menu: ResMut<MenuState>) {
     match *input_state {
         InputState::Down => {
             menu.selected = (menu.selected + 1) % menu.options.len();
@@ -19,7 +15,7 @@ fn menu_input(
         }
         InputState::Select => menu.choice = Some(menu.selected),
         InputState::Back => {
-            app_exit.write_default();
+            menu.back = true;
         }
         _ => {}
     }

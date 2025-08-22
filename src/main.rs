@@ -31,6 +31,15 @@ struct MenuState {
     back: bool,
 }
 
+impl MenuState {
+    pub fn clear(&mut self) {
+        self.options = Vec::new();
+        self.selected = 0;
+        self.choice = None;
+        self.back = false;
+    }
+}
+
 #[derive(Resource)]
 pub enum InputState {
     None,
