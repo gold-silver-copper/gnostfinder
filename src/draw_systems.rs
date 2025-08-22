@@ -1,29 +1,52 @@
 use crate::*;
+use ratatui::widgets::{List, ListItem, ListState};
 
-/// Draws the main menu.
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
+
 fn draw_system(mut context: ResMut<RatatuiContext>, menu: Res<MenuState>) {
     let _ = context.draw(|frame| {
         let area = frame.area();
 
-        let mut lines: Vec<Line> = Vec::new();
-        for (i, opt) in menu.options.iter().enumerate() {
-            if i == menu.selected {
-                lines.push(Line::from(Span::styled(
-                    format!("> {opt} <"),
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD),
-                )));
-            } else {
-                lines.push(Line::from(Span::raw(format!("  {opt}  "))));
-            }
-        }
+        // Vertical layout: top padding, list, bottom padding
+        let vertical_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Percentage(50),                        // top padding
+                Constraint::Length(menu.options.len() as u16 + 2), // list height (+2 for borders)
+                Constraint::Percentage(50),                        // bottom padding
+            ])
+            .split(area);
 
-        let paragraph = Paragraph::new(Text::from(lines))
-            .alignment(Alignment::Center)
-            .block(Block::default().title("Main Menu").borders(Borders::ALL));
+        // Horizontal layout: left padding, list, right padding
+        let horizontal_chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Percentage(25), // left padding
+                Constraint::Percentage(50), // list width
+                Constraint::Percentage(25), // right padding
+            ])
+            .split(vertical_chunks[1]); // put the list in the middle vertical chunk
 
-        frame.render_widget(paragraph, area);
+        // Convert menu options into ListItems
+        let items: Vec<ListItem> = menu.options.iter().map(|opt| ListItem::new(*opt)).collect();
+
+        let mut state = ratatui::widgets::ListState::default();
+        state.select(Some(menu.selected));
+
+        let list = ratatui::widgets::List::new(items)
+            .block(
+                ratatui::widgets::Block::default()
+                    .title("Main Menu")
+                    .borders(ratatui::widgets::Borders::ALL),
+            )
+            .highlight_style(
+                ratatui::style::Style::default()
+                    .fg(ratatui::style::Color::Yellow)
+                    .add_modifier(ratatui::style::Modifier::BOLD),
+            )
+            .highlight_symbol("> ");
+
+        frame.render_stateful_widget(list, horizontal_chunks[1], &mut state);
     });
 }
 
