@@ -15,7 +15,7 @@ use input_systems::*;
 #[derive(States, Debug, Clone, Eq, PartialEq, Hash, Default)]
 enum GameState {
     #[default]
-    Menu,
+    MainMenu,
     NewGame,
     LoadGame,
     Settings,
@@ -25,17 +25,33 @@ enum GameState {
 // Menu structure
 #[derive(Resource)]
 struct MenuState {
-    options: Vec<&'static str>,
+    options: Vec<String>,
     selected: usize,
+    choice: Option<usize>,
+    back: bool,
+}
+
+#[derive(Resource)]
+pub enum InputState {
+    None,
+    Up,
+    Down,
+    Left,
+    Right,
+    Select,
+    Back,
 }
 
 fn main() {
     let mut app = App::new();
 
     app.insert_resource(MenuState {
-        options: vec!["New Game", "Load Game", "Settings", "Exit"],
+        options: Vec::new(),
         selected: 0,
+        choice: None,
+        back: false,
     })
+    .insert_resource(InputState::None)
     .add_plugins((
         DefaultPlugins.set(ImagePlugin::default_nearest()),
         RatatuiPlugins {

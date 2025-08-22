@@ -3,7 +3,17 @@ use ratatui::widgets::{List, ListItem, ListState};
 
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 
-fn draw_system(mut context: ResMut<RatatuiContext>, menu: Res<MenuState>) {
+fn draw_main_menu(
+    mut context: ResMut<RatatuiContext>,
+    mut menu: ResMut<MenuState>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    menu.options = vec![
+        "New Game".to_string(),
+        "Load Game".to_string(),
+        "Settings".to_string(),
+        "Exit".to_string(),
+    ];
     let _ = context.draw(|frame| {
         let area = frame.area();
 
@@ -28,7 +38,11 @@ fn draw_system(mut context: ResMut<RatatuiContext>, menu: Res<MenuState>) {
             .split(vertical_chunks[1]); // put the list in the middle vertical chunk
 
         // Convert menu options into ListItems
-        let items: Vec<ListItem> = menu.options.iter().map(|opt| ListItem::new(*opt)).collect();
+        let items: Vec<ListItem> = menu
+            .options
+            .iter()
+            .map(|opt| ListItem::new(opt.clone()))
+            .collect();
 
         let mut state = ratatui::widgets::ListState::default();
         state.select(Some(menu.selected));
@@ -48,8 +62,29 @@ fn draw_system(mut context: ResMut<RatatuiContext>, menu: Res<MenuState>) {
 
         frame.render_stateful_widget(list, horizontal_chunks[1], &mut state);
     });
+
+    match menu.choice {
+        Some(x) => match x {
+            0 => next_state.set(GameState::NewGame),
+            1 => next_state.set(GameState::LoadGame),
+            2 => next_state.set(GameState::Settings),
+            3 => next_state.set(GameState::Exiting),
+            _ => {}
+        },
+        None => {}
+    };
+    menu.choice = None;
 }
 
+// This function implements `Plugin`, along with every other `fn(&mut App)`.
+pub fn draw_menus_plugin(app: &mut App) {
+    app.add_systems(
+        Update,
+        (draw_main_menu).run_if(in_state(GameState::MainMenu)),
+    );
+}
+
+/*
 /// Screen: New Game
 fn draw_new_game(mut context: ResMut<RatatuiContext>) {
     let _ = context.draw(|frame| {
@@ -60,33 +95,4 @@ fn draw_new_game(mut context: ResMut<RatatuiContext>) {
         frame.render_widget(text, area);
     });
 }
-
-/// Screen: Load Game
-fn draw_load_game(mut context: ResMut<RatatuiContext>) {
-    let _ = context.draw(|frame| {
-        let area = frame.area();
-        let text = Paragraph::new("Load Game Screen\nPress 'q' to quit")
-            .alignment(Alignment::Center)
-            .block(Block::default().title("Load Game").borders(Borders::ALL));
-        frame.render_widget(text, area);
-    });
-}
-
-/// Screen: Settings
-fn draw_settings(mut context: ResMut<RatatuiContext>) {
-    let _ = context.draw(|frame| {
-        let area = frame.area();
-        let text = Paragraph::new("Settings Screen\nPress 'q' to quit")
-            .alignment(Alignment::Center)
-            .block(Block::default().title("Settings").borders(Borders::ALL));
-        frame.render_widget(text, area);
-    });
-}
-
-// This function implements `Plugin`, along with every other `fn(&mut App)`.
-pub fn draw_menus_plugin(app: &mut App) {
-    app.add_systems(Update, (draw_system).run_if(in_state(GameState::Menu)))
-        .add_systems(Update, draw_new_game.run_if(in_state(GameState::NewGame)))
-        .add_systems(Update, draw_load_game.run_if(in_state(GameState::LoadGame)))
-        .add_systems(Update, draw_settings.run_if(in_state(GameState::Settings)));
-}
+ */

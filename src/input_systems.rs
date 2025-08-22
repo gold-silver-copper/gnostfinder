@@ -1,44 +1,55 @@
 use crate::*;
 
-/// Handles global input (works in any screen).
-fn global_input(keys: Res<ButtonInput<KeyCode>>, mut app_exit: EventWriter<AppExit>) {
-    if keys.just_pressed(KeyCode::KeyQ) {
-        app_exit.write_default();
+/// Handles input when in the menu.
+fn menu_input(
+    input_state: Res<InputState>,
+    mut menu: ResMut<MenuState>,
+    mut app_exit: EventWriter<AppExit>,
+) {
+    match *input_state {
+        InputState::Down => {
+            menu.selected = (menu.selected + 1) % menu.options.len();
+        }
+        InputState::Up => {
+            if menu.selected == 0 {
+                menu.selected = menu.options.len() - 1;
+            } else {
+                menu.selected -= 1;
+            }
+        }
+        InputState::Select => menu.choice = Some(menu.selected),
+        InputState::Back => {
+            app_exit.write_default();
+        }
+        _ => {}
     }
 }
 
 /// Handles input when in the menu.
-fn menu_input(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut menu: ResMut<MenuState>,
-    mut next_state: ResMut<NextState<GameState>>,
-    mut app_exit: EventWriter<AppExit>,
-) {
+fn input_handler(keys: Res<ButtonInput<KeyCode>>, mut input_state: ResMut<InputState>) {
+    *input_state = InputState::None;
     if keys.just_pressed(KeyCode::ArrowDown) {
-        menu.selected = (menu.selected + 1) % menu.options.len();
+        *input_state = InputState::Down;
     }
     if keys.just_pressed(KeyCode::ArrowUp) {
-        if menu.selected == 0 {
-            menu.selected = menu.options.len() - 1;
-        } else {
-            menu.selected -= 1;
-        }
+        *input_state = InputState::Up;
     }
-
-    //app_exit.write_default(),
     if keys.just_pressed(KeyCode::Enter) {
-        match menu.selected {
-            0 => next_state.set(GameState::NewGame),
-            1 => next_state.set(GameState::LoadGame),
-            2 => next_state.set(GameState::Settings),
-            3 => next_state.set(GameState::Exiting),
-            _ => {}
-        }
+        *input_state = InputState::Select;
+    }
+    if keys.just_pressed(KeyCode::KeyQ) {
+        *input_state = InputState::Back;
+    }
+    if keys.just_pressed(KeyCode::ArrowLeft) {
+        *input_state = InputState::Left;
+    }
+    if keys.just_pressed(KeyCode::ArrowRight) {
+        *input_state = InputState::Right;
     }
 }
 
 // This function implements `Plugin`, along with every other `fn(&mut App)`.
 pub fn input_systems_plugin(app: &mut App) {
-    app.add_systems(Update, (menu_input).run_if(in_state(GameState::Menu)))
-        .add_systems(PreUpdate, global_input);
+    app.add_systems(PreUpdate, input_handler)
+        .add_systems(Update, menu_input.run_if(in_state(GameState::MainMenu)));
 }
