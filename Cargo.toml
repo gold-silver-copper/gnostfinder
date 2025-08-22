@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.99"
 bevy = "0.16.1"
 bevy_ratatui = { version = "0.9.2", features = ["windowed"] }
 english = "0.1.3"
