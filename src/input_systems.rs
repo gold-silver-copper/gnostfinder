@@ -10,6 +10,11 @@ pub enum InputState {
     Back,
 }
 
+// This function implements `Plugin`, along with every other `fn(&mut App)`.
+pub fn input_systems_plugin(app: &mut App) {
+    app.add_systems(PreUpdate, input_handler);
+}
+
 /// Handles input when in the menu.
 fn input_handler(keys: Res<ButtonInput<KeyCode>>, mut game_state: ResMut<GameState>) {
     game_state.input_state = InputState::None;
@@ -31,9 +36,4 @@ fn input_handler(keys: Res<ButtonInput<KeyCode>>, mut game_state: ResMut<GameSta
     if keys.just_pressed(KeyCode::ArrowRight) {
         game_state.input_state = InputState::Right;
     }
-}
-
-// This function implements `Plugin`, along with every other `fn(&mut App)`.
-pub fn input_systems_plugin(app: &mut App) {
-    app.add_systems(PreUpdate, input_handler);
 }

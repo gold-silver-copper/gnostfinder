@@ -11,20 +11,16 @@ use game_state::*;
 fn main() {
     let mut app = App::new();
 
-    app.insert_resource(GameState {
-        input_state: InputState::None,
-        player_id: 0,
-        location_map: LocationMap::new(),
-    })
-    .add_plugins((
-        DefaultPlugins.set(ImagePlugin::default_nearest()),
-        RatatuiPlugins {
-            enable_input_forwarding: true,
-            ..default()
-        },
-        draw_menus_plugin,
-        input_systems_plugin,
-        game_state_plugin,
-    ))
-    .run();
+    app.insert_resource(GameState::new())
+        .add_plugins((
+            DefaultPlugins.set(ImagePlugin::default_nearest()),
+            RatatuiPlugins {
+                enable_input_forwarding: true,
+                ..default()
+            },
+            draw_menus_plugin,
+            input_systems_plugin,
+            game_state_plugin,
+        ))
+        .run();
 }
