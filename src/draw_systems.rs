@@ -1,17 +1,13 @@
 use crate::*;
-use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::widgets::{List, ListItem, ListState};
+use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::{
-    Frame,
-    backend::CrosstermBackend,
     style::{Color, Style},
-    text::Span,
     widgets::{Block, Borders, Paragraph, Wrap},
 };
 
 // This function implements `Plugin`, along with every other `fn(&mut App)`.
 pub fn draw_menus_plugin(app: &mut App) {
-    app.add_systems(PostUpdate, (draw_rpg_screen));
+    app.add_systems(PostUpdate, draw_rpg_screen);
 }
 
 /// Screen: RPG World
