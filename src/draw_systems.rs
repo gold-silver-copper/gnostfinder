@@ -1,128 +1,76 @@
 use crate::*;
-use ratatui::widgets::{List, ListItem, ListState};
-
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
-fn draw_main_menu(
-    mut context: ResMut<RatatuiContext>,
-    mut menu: ResMut<MenuState>,
-    mut next_state: ResMut<NextState<GameState>>,
-) {
-    menu.options = vec!["Worlds".into(), "Exit".into()];
-
-    if menu.back {
-        panic!("bye bye");
-    }
-
-    let _ = context.draw(|frame| {
-        let area = frame.area();
-
-        // Solid background
-        frame.render_widget(
-            Block::default().style(Style::default().bg(Color::Black)),
-            area,
-        );
-
-        // Vertical layout: top (subtitle), menu, bottom (footer)
-        let vertical_chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints([
-                Constraint::Percentage(30),                     // top
-                Constraint::Min(menu.options.len() as u16 + 4), // menu
-                Constraint::Percentage(30),                     // bottom
-            ])
-            .split(area);
-
-        // Horizontal layout for menu centering
-        let horizontal_chunks = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints([
-                Constraint::Percentage(25), // left
-                Constraint::Percentage(50), // middle
-                Constraint::Percentage(25), // right
-            ])
-            .split(vertical_chunks[1]);
-
-        // --- CLEAN TEXT SECTIONS ---
-        let top_text = Paragraph::new("Welcome to the Adventure")
-            .style(
-                Style::default()
-                    .fg(Color::White)
-                    .add_modifier(Modifier::BOLD),
-            )
-            .alignment(Alignment::Center);
-
-        let bottom_text = Paragraph::new("Use ↑/↓ to navigate, Enter to select")
-            .style(Style::default().fg(Color::DarkGray))
-            .alignment(Alignment::Center);
-
-        // --- MENU LIST ---
-        let items: Vec<ListItem> = menu
-            .options
-            .iter()
-            .map(|opt| ListItem::new(opt.clone()))
-            .collect();
-
-        let mut state = ratatui::widgets::ListState::default();
-        state.select(Some(menu.selected));
-
-        let list = ratatui::widgets::List::new(items)
-            .block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .title(" Main Menu ")
-                    .style(Style::default().fg(Color::Gray)),
-            )
-            .highlight_style(
-                Style::default()
-                    .fg(Color::Black)
-                    .bg(Color::White)
-                    .add_modifier(Modifier::BOLD),
-            )
-            .highlight_symbol("› ");
-
-        // --- RENDER ---
-        frame.render_widget(top_text, vertical_chunks[0]);
-        frame.render_widget(bottom_text, vertical_chunks[2]);
-        frame.render_stateful_widget(list, horizontal_chunks[1], &mut state);
-    });
-
-    match menu.choice {
-        Some(x) => match x {
-            0 => next_state.set(GameState::WorldMenu),
-
-            1 => next_state.set(GameState::Exiting),
-            _ => {
-                menu.choice = None;
-            }
-        },
-        None => {}
-    };
-}
-
-fn game_exit() {
-    panic!("bye bye");
-}
+use ratatui::widgets::{List, ListItem, ListState};
+use ratatui::{
+    Frame,
+    backend::CrosstermBackend,
+    style::{Color, Style},
+    text::Span,
+    widgets::{Block, Borders, Paragraph, Wrap},
+};
 
 // This function implements `Plugin`, along with every other `fn(&mut App)`.
 pub fn draw_menus_plugin(app: &mut App) {
-    app.add_systems(
-        Update,
-        (draw_main_menu).run_if(in_state(GameState::MainMenu)),
-    )
-    .add_systems(
-        Update,
-        (draw_worlds_menu).run_if(in_state(GameState::WorldMenu)),
-    )
-    .add_systems(Update, (game_exit).run_if(in_state(GameState::Exiting)));
+    app.add_systems(Update, (draw_rpg_screen));
 }
 
-/// Screen: New Game
-fn draw_worlds_menu(mut context: ResMut<RatatuiContext>) {
+/// Screen: RPG World
+fn draw_rpg_screen(mut context: ResMut<RatatuiContext>) {
     let _ = context.draw(|frame| {
         let area = frame.area();
-        let text = Paragraph::new("New Game Screen\nPress 'q' to quit")
-            .alignment(Alignment::Center)
-            .block(Block::default().title("New Game").borders(Borders::ALL));
-        frame.render_widget(text, area);
+
+        // Split screen into main body + command bar
+        let vertical_layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Min(5),
+                Constraint::Length(3), // command bar
+            ])
+            .split(area);
+
+        // Split main body into sidebar + event feed
+        let horizontal_layout = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Min(10),
+                Constraint::Length(30), // sidebar width
+            ])
+            .split(vertical_layout[0]);
+
+        // Sidebar: Stats + Inventory
+        let sidebar_text = vec![
+            Line::from("Stats:"),
+            Line::from("HP: 100/100"),
+            Line::from("MP: 50/50"),
+            Line::from("Level: 1"),
+            Line::from("XP: 0"),
+            Line::from(""),
+            Line::from("Inventory:"),
+            Line::from("- Sword"),
+            Line::from("- Shield"),
+            Line::from("- Potion x3"),
+        ];
+        let sidebar = Paragraph::new(sidebar_text)
+            .block(Block::default().title("Character").borders(Borders::ALL))
+            .wrap(Wrap { trim: true });
+        frame.render_widget(sidebar, horizontal_layout[1]);
+
+        // Event / text feed
+        let event_text = vec![
+            Line::from("You enter a dark forest. The trees whisper around you."),
+            Line::from("A wild goblin appears!"),
+            Line::from("You can attack, defend, or flee."),
+        ];
+        let events = Paragraph::new(event_text)
+            .block(Block::default().title("Events").borders(Borders::ALL))
+            .wrap(Wrap { trim: true });
+        frame.render_widget(events, horizontal_layout[0]);
+
+        // Command bar
+        let commands =
+            Paragraph::new("Commands: [a] Attack  [d] Defend  [f] Flee  [i] Inventory  [q] Quit")
+                .style(Style::default().fg(Color::Yellow))
+                .block(Block::default().borders(Borders::ALL).title("Actions"));
+        frame.render_widget(commands, vertical_layout[1]);
     });
 }
