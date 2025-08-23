@@ -1,5 +1,3 @@
-use bevy::platform::collections::{HashMap, HashSet};
-
 use crate::*;
 
 fn game_state_run(mut game_state: ResMut<GameState>) {
@@ -20,23 +18,6 @@ pub struct GameState {
     id_counter: ID,
 }
 
-pub type LocationMap = HashMap<ID, Location>;
-pub struct Location {
-    contained_things: ThingSet,
-    connections_to: HashSet<Connection>,
-}
-pub struct Connection {
-    to_location: ID,
-    connection_type: ConnectionType,
-}
-pub enum ConnectionType {
-    Door,
-}
-
-pub type ThingSet = HashSet<Thing>;
-pub struct Thing {
-    id: ID,
-}
 pub type ID = usize;
 
 impl GameState {
@@ -51,8 +32,27 @@ impl GameState {
     fn run(&mut self) {
         self.input_handler();
     }
+    fn new_id(&mut self) -> ID {
+        self.id_counter += 1;
+        self.id_counter.clone()
+    }
 
-    fn create_location(&mut self) {}
+    fn new_location(&mut self) -> ID {
+        let id = self.new_id();
+        let location = Location::new();
+        self.location_map.insert(id.clone(), location.clone());
+        id.clone()
+    }
+    fn new_thing(&mut self) -> ID {
+        let id = self.new_id();
+        let thing = Thing::new();
+
+        id.clone()
+    }
+
+    fn init_world(&mut self) {
+        let start = self.new_location();
+    }
 
     fn input_handler(&mut self) {
         match self.input_state {
