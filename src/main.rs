@@ -8,8 +8,7 @@ mod input_systems;
 use input_systems::*;
 mod game_state;
 use game_state::*;
-mod location;
-use location::*;
+
 mod thing;
 use petgraph::Graph;
 use thing::*;

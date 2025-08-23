@@ -15,57 +15,70 @@ pub fn game_state_plugin(app: &mut App) {
 #[derive(Resource)]
 pub struct GameState {
     pub input_state: InputState,
-    pub player_id: ID,
-    pub location_graph: LocationGraph,
-    id_counter: ID,
+    pub player_id: NodeIndex,
+    pub thing_graph: ThingGraph,
 }
-
-pub type ID = usize;
-pub type LocationGraph = Graph<Location, Connection>;
 
 impl GameState {
     pub fn new() -> Self {
-        GameState {
+        let mut gs = GameState {
             input_state: InputState::None,
-            player_id: 0,
-            thing_graph: LocationGraph::new(),
-            id_counter: 0,
-        }
+            player_id: NodeIndex::new(0),
+            thing_graph: ThingGraph::new(),
+        };
+        gs.init_world();
+        gs
     }
     fn run(&mut self) {
         self.input_handler();
     }
-    fn new_id(&mut self) -> ID {
-        self.id_counter += 1;
-        self.id_counter.clone()
-    }
 
-    fn new_location(&mut self) -> NodeIndex {
-        let location = Location::new();
-        let location_id = self.location_graph.add_node(location);
-        location_id.clone()
-    }
-    fn new_thing(&mut self, location_id: NodeIndex) -> ID {
-        let thing_id = self.new_id();
-        let thing = Thing::new();
+    pub fn init_world(&mut self) {
+        // 1. Create starting location
 
-        if let Some(location) = self.location_graph.node_weight_mut(location_id) {
-            location.insert_thing(thing_id.clone(), thing);
-        }
+        let town_node = self.thing_graph.add_node(Thing::new_location(
+            "Oakvale",
+            "A quiet town with cobbled streets.",
+            LocationType::Town,
+        ));
 
-        let a = self
-            .location_graph
-            .get_mut(&location_id)
-            .expect("TRIED TO GET A LOCATION THAT DOESNT EXIST");
-        a.insert_thing(thing_id.clone(), thing);
+        // 2. Create player
 
-        thing_id.clone()
-    }
+        let player_node =
+            self.thing_graph
+                .add_node(Thing::new_person("Alice", 100, 50, PersonType::Knight));
+        self.player_id = player_node;
 
-    fn init_world(&mut self) {
-        let start = self.new_location();
-        let player = self.new_thing(start);
-        self.player_id = player;
+        // 3. Create a starting item
+
+        let sword_node = self
+            .thing_graph
+            .add_node(Thing::new_item("Iron Sword", ItemType::Weapon));
+
+        // 4. Connect player to location (Inside)
+        self.thing_graph
+            .add_edge(player_node, town_node, GameEdge::Relation(RelationType::At));
+
+        // 5. Place item in location (Inside)
+        self.thing_graph
+            .add_edge(sword_node, town_node, GameEdge::Relation(RelationType::At));
+
+        // 6. Optional: add another location and connect via a passage
+
+        let forest_node = self.thing_graph.add_node(Thing::new_location(
+            "Whispering Woods",
+            "The trees seem alive here.",
+            LocationType::Forest,
+        ));
+
+        self.thing_graph.add_edge(
+            town_node,
+            forest_node,
+            GameEdge::Passage(PassageType::Street),
+        );
+
+        // Now you have a simple world graph:
+        // Town <-> Forest, Player and Sword inside Town
     }
 
     fn input_handler(&mut self) {
