@@ -1,11 +1,25 @@
+use bevy::platform::collections::{HashMap, HashSet};
+
 use crate::*;
 
 // Menu structure
 #[derive(Resource)]
 pub struct GameState {
     pub input_state: InputState,
-    pub player_id: usize,
+    pub player_id: ID,
+    pub location_map: LocationMap,
 }
+
+pub type LocationMap = HashMap<ID, Location>;
+pub struct Location {
+    contained_things: ThingSet,
+}
+pub type ThingSet = HashSet<Thing>;
+pub struct Thing {
+    id: ID,
+}
+pub type ID = usize;
+
 impl GameState {
     fn run(&mut self) {
         self.input_handler();

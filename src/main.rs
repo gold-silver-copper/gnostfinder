@@ -14,6 +14,7 @@ fn main() {
     app.insert_resource(GameState {
         input_state: InputState::None,
         player_id: 0,
+        location_map: LocationMap::new(),
     })
     .add_plugins((
         DefaultPlugins.set(ImagePlugin::default_nearest()),
