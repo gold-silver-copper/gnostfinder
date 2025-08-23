@@ -16,9 +16,8 @@ use input_systems::*;
 enum GameState {
     #[default]
     MainMenu,
-    NewGame,
-    LoadGame,
-    Settings,
+    WorldMenu,
+    CharacterCreation,
     Exiting,
 }
 

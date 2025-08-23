@@ -7,12 +7,7 @@ fn draw_main_menu(
     mut menu: ResMut<MenuState>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    menu.options = vec![
-        "New Game".into(),
-        "Load Game".into(),
-        "Settings".into(),
-        "Exit".into(),
-    ];
+    menu.options = vec!["Worlds".into(), "Exit".into()];
 
     if menu.back {
         panic!("bye bye");
@@ -93,10 +88,9 @@ fn draw_main_menu(
 
     match menu.choice {
         Some(x) => match x {
-            0 => next_state.set(GameState::NewGame),
-            1 => next_state.set(GameState::LoadGame),
-            2 => next_state.set(GameState::Settings),
-            3 => next_state.set(GameState::Exiting),
+            0 => next_state.set(GameState::WorldMenu),
+
+            1 => next_state.set(GameState::Exiting),
             _ => {
                 menu.choice = None;
             }
@@ -115,7 +109,10 @@ pub fn draw_menus_plugin(app: &mut App) {
         Update,
         (draw_main_menu).run_if(in_state(GameState::MainMenu)),
     )
-    .add_systems(Update, (draw_new_game).run_if(in_state(GameState::NewGame)))
+    .add_systems(
+        Update,
+        (draw_new_game).run_if(in_state(GameState::WorldMenu)),
+    )
     .add_systems(Update, (game_exit).run_if(in_state(GameState::Exiting)));
 }
 
