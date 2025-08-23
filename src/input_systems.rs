@@ -9,18 +9,6 @@ pub enum InputState {
     Select,
     Back,
 }
-/// Handles input when in the menu.
-fn menu_input(mut game_state: ResMut<GameState>) {
-    match game_state.input_state {
-        InputState::Down => (),
-        InputState::Up => (),
-        InputState::Select => (),
-        InputState::Back => {
-            panic!("aaa");
-        }
-        _ => {}
-    }
-}
 
 /// Handles input when in the menu.
 fn input_handler(keys: Res<ButtonInput<KeyCode>>, mut game_state: ResMut<GameState>) {
@@ -47,6 +35,5 @@ fn input_handler(keys: Res<ButtonInput<KeyCode>>, mut game_state: ResMut<GameSta
 
 // This function implements `Plugin`, along with every other `fn(&mut App)`.
 pub fn input_systems_plugin(app: &mut App) {
-    app.add_systems(PreUpdate, input_handler)
-        .add_systems(Update, menu_input);
+    app.add_systems(PreUpdate, input_handler);
 }

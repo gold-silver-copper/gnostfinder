@@ -28,6 +28,7 @@ fn main() {
         },
         draw_menus_plugin,
         input_systems_plugin,
+        game_state_plugin,
     ))
     .run();
 }
