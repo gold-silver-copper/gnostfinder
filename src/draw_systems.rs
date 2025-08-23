@@ -111,13 +111,13 @@ pub fn draw_menus_plugin(app: &mut App) {
     )
     .add_systems(
         Update,
-        (draw_new_game).run_if(in_state(GameState::WorldMenu)),
+        (draw_worlds_menu).run_if(in_state(GameState::WorldMenu)),
     )
     .add_systems(Update, (game_exit).run_if(in_state(GameState::Exiting)));
 }
 
 /// Screen: New Game
-fn draw_new_game(mut context: ResMut<RatatuiContext>) {
+fn draw_worlds_menu(mut context: ResMut<RatatuiContext>) {
     let _ = context.draw(|frame| {
         let area = frame.area();
         let text = Paragraph::new("New Game Screen\nPress 'q' to quit")
