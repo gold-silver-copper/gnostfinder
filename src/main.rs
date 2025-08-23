@@ -11,8 +11,8 @@ use game_state::*;
 mod location;
 use location::*;
 mod thing;
+use petgraph::Graph;
 use thing::*;
-
 fn main() {
     let mut app = App::new();
 
