@@ -44,9 +44,10 @@ impl GameState {
 
         // 2. Create player
 
-        let player_node =
-            self.thing_graph
-                .add_node(Thing::new_person("Alice", 100, 50, PersonType::Knight));
+        let player_node = self
+            .thing_graph
+            .add_node(Thing::new_person(CharacterSheet::default()));
+
         self.player_id = player_node;
 
         // 3. Create a starting item

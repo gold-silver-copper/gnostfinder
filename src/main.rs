@@ -1,4 +1,3 @@
-use bevy::platform::collections::{HashMap, HashSet};
 use bevy::prelude::*;
 use bevy_ratatui::{RatatuiContext, RatatuiPlugins};
 use ratatui::text::Line;
@@ -8,7 +7,8 @@ mod input_systems;
 use input_systems::*;
 mod game_state;
 use game_state::*;
-
+mod character_sheet;
+use character_sheet::*;
 mod thing;
 use petgraph::Graph;
 use thing::*;

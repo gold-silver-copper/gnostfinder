@@ -3,7 +3,7 @@ use crate::*;
 #[derive(Clone, Debug)]
 pub enum Thing {
     Location(Location),
-    Person(GamePerson),
+    Person(CharacterSheet),
     Item(Item),
 }
 
@@ -23,24 +23,6 @@ pub enum LocationType {
     Tavern,
     Forest,
     Dungeon,
-}
-
-/// A person/character in the world.
-#[derive(Clone, Debug)]
-pub struct GamePerson {
-    pub name: String,
-    pub hp: i32,
-    pub mp: i32,
-    pub kind: PersonType,
-}
-
-/// Type of person
-#[derive(Clone, Debug)]
-pub enum PersonType {
-    Villager,
-    Knight,
-    Merchant,
-    Enemy,
 }
 
 /// An item in the world.
@@ -100,13 +82,8 @@ impl Thing {
     }
 
     /// Create a new person.
-    pub fn new_person(name: &str, hp: i32, mp: i32, kind: PersonType) -> Self {
-        Thing::Person(GamePerson {
-            name: name.to_string(),
-            hp,
-            mp,
-            kind,
-        })
+    pub fn new_person(cs: CharacterSheet) -> Self {
+        Thing::Person(cs)
     }
 
     /// Create a new item.
