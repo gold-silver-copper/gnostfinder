@@ -2,9 +2,16 @@ use crate::*;
 
 #[derive(Clone, Debug)]
 pub enum Thing {
+    MetaLocation { name: String, meta: MetaLocation },
     Location(Location),
     Person(CharacterSheet),
     Item(Item),
+}
+#[derive(Clone, Debug)]
+pub enum MetaLocation {
+    House,
+    City,
+    Street,
 }
 
 /// A location in the world graph.
@@ -20,7 +27,7 @@ pub struct Location {
 pub enum LocationType {
     Room,
     Hall,
-    Street,
+    StreetSection,
 }
 
 /// An item in the world.
@@ -68,6 +75,7 @@ impl Thing {
             Thing::Location(loc) => &loc.name,
             Thing::Person(person) => &person.name,
             Thing::Item(item) => &item.name,
+            Thing::MetaLocation { name, .. } => name.as_str(),
         }
     }
 }

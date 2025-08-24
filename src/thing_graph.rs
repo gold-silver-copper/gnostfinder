@@ -7,8 +7,9 @@ pub trait MyGraph {
 
     fn add_north_south(&mut self, north: NodeIndex, south: NodeIndex);
     fn add_east_west(&mut self, east: NodeIndex, west: NodeIndex);
+    fn part_of(&mut self, a: NodeIndex, b: NodeIndex);
+    fn contained_by(&mut self, a: NodeIndex, b: NodeIndex);
 
-    fn add_bidirectional_relation(&mut self, a: NodeIndex, b: NodeIndex, relation: Relation);
     fn describe_location(&self, thing_id: NodeIndex) -> String;
 }
 
@@ -57,6 +58,12 @@ impl MyGraph for ThingGraph {
             GameEdge::Connection(Connection::Door(ConnectionState::Open)),
         );
     }
+    fn part_of(&mut self, a: NodeIndex, b: NodeIndex) {
+        self.add_edge(b, a, GameEdge::Relation(Relation::PartOf));
+    }
+    fn contained_by(&mut self, a: NodeIndex, b: NodeIndex) {
+        self.add_edge(a, b, GameEdge::Relation(Relation::Contains));
+    }
 
     fn add_passageway(&mut self, a: NodeIndex, b: NodeIndex) {
         self.add_edge(a, b, GameEdge::Connection(Connection::Passageway));
@@ -86,39 +93,6 @@ impl MyGraph for ThingGraph {
         self.add_edge(east, west, GameEdge::Relation(Relation::WestOf));
         self.add_edge(west, east, GameEdge::Relation(Relation::EastOf));
     }
-
-    // --- Generic bidirectional for other relations ---
-    fn add_bidirectional_relation(&mut self, a: NodeIndex, b: NodeIndex, relation: Relation) {
-        use Relation::*;
-        match relation {
-            // Automatically add the inverse for cardinal directions
-            NorthOf => self.add_north_south(a, b),
-            SouthOf => self.add_north_south(b, a),
-            EastOf => self.add_east_west(a, b),
-            WestOf => self.add_east_west(b, a),
-
-            // Symmetric relations: just add in both directions
-            OnTopOf | Underneath | AttachedTo | NextTo => {
-                self.add_edge(a, b, GameEdge::Relation(relation));
-                self.add_edge(b, a, GameEdge::Relation(relation));
-            }
-
-            // Asymmetric, don’t auto-invert
-            Contains => {
-                self.add_edge(a, b, GameEdge::Relation(Contains));
-            }
-
-            Above | Below => {
-                self.add_edge(a, b, GameEdge::Relation(relation));
-                // optionally invert if desired:
-                // self.add_edge(b, a, GameEdge::Relation(match relation {
-                //     Above => Below,
-                //     Below => Above,
-                //     _ => relation,
-                // }));
-            }
-        }
-    }
 }
 
 pub type ThingGraph = Graph<Thing, GameEdge>;
@@ -138,7 +112,8 @@ pub enum GameEdge {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Relation {
     // --- Topological (RCC-like) ---
-    Contains, // A contains B
+    Contains, // A contains B (physical)
+    PartOf,   //A is part of b (metaphysical)
 
     // --- Cardinal / Directional ---
     NorthOf,
@@ -202,6 +177,7 @@ impl Relation {
             Relation::EastOf => format!("to the east is {}", target),
             Relation::WestOf => format!("to the west is {}", target),
             Relation::Contains => format!("contains {}", target),
+            Relation::PartOf => format!("is part of {}", target),
             Relation::OnTopOf => format!("on top of {}", target),
             Relation::NextTo => format!("next to {}", target),
             Relation::Above => format!("above {}", target),

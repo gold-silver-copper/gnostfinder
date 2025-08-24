@@ -50,7 +50,7 @@ impl GameState {
             .add_node(Thing::new_location("Lobby", LocationType::Hall));
         let street = self
             .thing_graph
-            .add_node(Thing::new_location("street", LocationType::Street));
+            .add_node(Thing::new_location("street", LocationType::StreetSection));
 
         // 2. Create player
 
@@ -60,9 +60,7 @@ impl GameState {
 
         self.player_id = player_node;
 
-        // 4. Connect player to location (Inside)
-        self.thing_graph
-            .add_edge(player_node, room1, GameEdge::Relation(Relation::Contains));
+        self.thing_graph.contained_by(player_node, room1);
 
         // 6. Optional: add another location and connect via a passage
 
