@@ -1,8 +1,3 @@
-use petgraph::Direction;
-use petgraph::graph::Graph;
-use petgraph::graph::NodeIndex;
-use petgraph::visit::EdgeRef;
-
 use crate::*;
 
 fn game_state_run(mut game_state: ResMut<GameState>) {
@@ -17,6 +12,7 @@ pub fn game_state_plugin(app: &mut App) {
 // Menu structure
 #[derive(Resource)]
 pub struct GameState {
+    pub last_input: LastInput,
     pub input_state: InputState,
     pub player_id: NodeIndex,
     pub thing_graph: ThingGraph,
@@ -25,7 +21,8 @@ pub struct GameState {
 impl GameState {
     pub fn new() -> Self {
         let mut gs = GameState {
-            input_state: InputState::None,
+            last_input: LastInput::None,
+            input_state: InputState::Main,
             player_id: NodeIndex::new(0),
             thing_graph: ThingGraph::new(),
         };
@@ -69,16 +66,12 @@ impl GameState {
 
         // 6. Optional: add another location and connect via a passage
 
-        self.thing_graph
-            .add_edge(room1, room2, GameEdge::Relation(Relation::NorthOf));
-        self.thing_graph
-            .add_edge(room1, hall, GameEdge::Connection(Connection::Door));
-        self.thing_graph
-            .add_edge(room2, hall, GameEdge::Connection(Connection::Door));
-        self.thing_graph
-            .add_edge(lobby, hall, GameEdge::Connection(Connection::Passageway));
-        self.thing_graph
-            .add_edge(lobby, street, GameEdge::Connection(Connection::Door));
+        self.thing_graph.add_north_south(room2, room1);
+        self.thing_graph.add_door(room1, hall);
+        self.thing_graph.add_door(room2, hall);
+
+        self.thing_graph.add_passageway(hall, lobby);
+        self.thing_graph.add_door(lobby, street);
 
         // Now you have a simple world graph:
     }
@@ -102,45 +95,32 @@ impl GameState {
             for edge in self.thing_graph.edges(loc) {
                 let target = edge.target();
                 let edge_type = edge.weight();
-                let target_name = &self.thing_graph[target].name();
+                let target_name = self.thing_graph[target].name(); // use display_name() if needed
 
-                let relation = match edge_type {
+                let phrase = match edge_type {
                     GameEdge::Relation(r) => match r {
-                        Relation::NorthOf => "to the north",
-                        Relation::SouthOf => "to the south",
-                        Relation::EastOf => "to the east",
-                        Relation::WestOf => "to the west",
-                        Relation::Contains => "contains",
-                        Relation::OnTopOf => "on top of",
-                        Relation::NextTo => "next to",
-                        _ => todo!(),
+                        Relation::NorthOf => format!("to the north is {}", target_name),
+                        Relation::SouthOf => format!("to the south is {}", target_name),
+                        Relation::EastOf => format!("to the east is {}", target_name),
+                        Relation::WestOf => format!("to the west is {}", target_name),
+                        Relation::Contains => format!("contains {}", target_name),
+                        Relation::OnTopOf => format!("on top of {}", target_name),
+                        Relation::NextTo => format!("next to {}", target_name),
+                        _ => format!("related to {}", target_name),
                     },
                     GameEdge::Connection(c) => match c {
-                        Connection::Door => "has door to",
-                        Connection::Passageway => "continues to",
-                        Connection::Window => "has a window to",
-                        // …whatever else you define
+                        Connection::Door => format!("there is a door to {}", target_name),
+                        Connection::Passageway => format!("continues to {}", target_name),
+                        Connection::Window => format!("there is a window to {}", target_name),
                     },
                 };
 
-                description.push_str(&format!("{} is {}.\n", target_name, relation));
+                description.push_str(&format!("{}\n", phrase));
             }
         } else {
             description.push_str("You are nowhere!\n");
         }
 
         description
-    }
-
-    fn input_handler(&mut self) {
-        match self.input_state {
-            InputState::Down => (),
-            InputState::Up => (),
-            InputState::Select => (),
-            InputState::Back => {
-                panic!("aaa");
-            }
-            _ => {}
-        }
     }
 }

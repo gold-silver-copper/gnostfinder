@@ -7,11 +7,61 @@ use ratatui::{
 
 // This function implements `Plugin`, along with every other `fn(&mut App)`.
 pub fn draw_menus_plugin(app: &mut App) {
-    app.add_systems(PostUpdate, draw_rpg_screen);
+    app.add_systems(PostUpdate, draw_manager);
+}
+
+fn draw_manager(mut context: ResMut<RatatuiContext>, game_state: Res<GameState>) {
+    draw_rpg_screen(&mut context, &game_state);
+    if game_state.input_state == InputState::Movement {
+        draw_movement_screen(&mut context, &game_state);
+    }
+}
+
+fn draw_movement_screen(context: &mut ResMut<RatatuiContext>, _game_state: &Res<GameState>) {
+    let _ = context.draw(|frame| {
+        let area = frame.area();
+
+        // Vertical split: top / center / bottom
+        let vertical_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Percentage(40), // top padding
+                Constraint::Length(7),      // center box height
+                Constraint::Percentage(40), // bottom padding
+            ])
+            .split(area);
+
+        // Horizontal split: left / center / right
+        let horizontal_chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Percentage(30), // left padding
+                Constraint::Length(30),     // center box width
+                Constraint::Percentage(30), // right padding
+            ])
+            .split(vertical_chunks[1]); // only split the middle vertical chunk
+
+        // Movement options to display
+        let movement_options = vec![
+            Line::from("[W] Move Up"),
+            Line::from("[A] Move Left"),
+            Line::from("[S] Move Down"),
+            Line::from("[D] Move Right"),
+            Line::from("[Q] Cancel"),
+        ];
+
+        let movement_paragraph = Paragraph::new(movement_options)
+            .block(Block::default().title("Movement").borders(Borders::ALL))
+            .wrap(Wrap { trim: true })
+            .alignment(Alignment::Center);
+
+        // Render in the central chunk
+        frame.render_widget(movement_paragraph, horizontal_chunks[1]);
+    });
 }
 
 /// Screen: RPG World
-fn draw_rpg_screen(mut context: ResMut<RatatuiContext>, game_state: Res<GameState>) {
+fn draw_rpg_screen(context: &mut ResMut<RatatuiContext>, game_state: &Res<GameState>) {
     let _ = context.draw(|frame| {
         let area = frame.area();
 
@@ -68,5 +118,11 @@ fn draw_rpg_screen(mut context: ResMut<RatatuiContext>, game_state: Res<GameStat
                 .style(Style::default().fg(Color::Yellow))
                 .block(Block::default().borders(Borders::ALL).title("Actions"));
         frame.render_widget(commands, vertical_layout[1]);
+    });
+}
+
+fn get_frame_area(context: &mut ResMut<RatatuiContext>, game_state: &Res<GameState>) {
+    let _ = context.draw(|frame| {
+        let area = frame.area();
     });
 }

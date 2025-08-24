@@ -1,5 +1,11 @@
 use bevy::prelude::*;
 use bevy_ratatui::{RatatuiContext, RatatuiPlugins};
+use petgraph::Direction;
+use petgraph::graph::Graph;
+use petgraph::graph::NodeIndex;
+use petgraph::visit::EdgeRef;
+use ratatui::prelude::Alignment;
+use ratatui::prelude::Rect;
 use ratatui::text::Line;
 mod draw_systems;
 use draw_systems::*;
@@ -10,7 +16,9 @@ use game_state::*;
 mod character_sheet;
 use character_sheet::*;
 mod thing;
-use petgraph::Graph;
+mod thing_graph;
+use thing_graph::*;
+
 use thing::*;
 fn main() {
     let mut app = App::new();
