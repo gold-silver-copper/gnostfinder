@@ -32,4 +32,35 @@ Gunsmithing
 
 Player Creation
 ------------------
-First the player chooses a faction
+First the player chooses a faction.
+They choose life events, hobbies, upbringing.
+They choose who they were when the event started.
+
+Player Inventory and Gear
+-----------------------------
+A player can wear many overlapping pieces of gear at once. Boxer shorts with cargo pants over them. A dress shirt with pockets, covered with a chest rig. Helmets, goggles, backpacks. Complex pocket system.
+
+
+
+
+
+
+
+
+
+Lore
+-------------
+A virus bioweapon was developed which has an extremely long activation time, and is extremely contagious. The virus has no symptoms for 6 months, then it fully activates and kills the person in a short period of time.
+
+The virus was either released on purpose, or leaked on accident, nobody knows, or at least you don't.
+
+A year after the leaking of the virus, general society has completely collapsed. The first wave of deaths generated mass panic, further spreading the disease. Many government leaders and civil servants were killed in the first wave of deaths due to their public nature, hastening the collapse.
+
+Police and the military were quickly deployed, and just as quickly they fell apart. As news of the virus spread, people became very isolationist, and did not want to patrol the streets in groups. Looters and rioters fiercely attacked any opposition, and each other as well. Cities lit up in flames, and the few that could ran for the countryside.
+
+Seeking refuge in the countryside, they found none. Small, close knit, rural communities wanted nothing to do with the disease bearing city slickers. Said communities formed local militias, and began defending their land. Soon many factions were formed, both in the countryside and in the cities.
+
+As civilization got to a breaking point, nukes started flying. Governments were often taken over by extremist and fringe groups, who were not hesitant to use the weapons against their enemies. Many countries nominally went to war against each other, but in reality this was more the byproduct of chaos spilling over. There was no nuclear winter, no global annihlation, but many major urban centers were completely destroyed.
+
+
+End goal of the game: Find the cure, Find the truth
