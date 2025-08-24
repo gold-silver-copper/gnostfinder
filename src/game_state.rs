@@ -75,52 +75,9 @@ impl GameState {
 
         // Now you have a simple world graph:
     }
-    pub fn describe_location(&self) -> String {
-        let mut description = String::new();
-
-        // 1. Find where the player is (edge: player --Contains--> location)
+    pub fn describe_player_location(&self) -> String {
         let player_node = self.player_id;
 
-        let location = self
-            .thing_graph
-            .edges(player_node)
-            .find(|edge| *edge.weight() == GameEdge::Relation(Relation::Contains))
-            .map(|edge| edge.target());
-
-        if let Some(loc) = location {
-            let loc_name = self.thing_graph[loc].name();
-            description.push_str(&format!("You are in {}.\n", loc_name));
-
-            // 2. Look at edges FROM the location to other locations
-            for edge in self.thing_graph.edges(loc) {
-                let target = edge.target();
-                let edge_type = edge.weight();
-                let target_name = self.thing_graph[target].name(); // use display_name() if needed
-
-                let phrase = match edge_type {
-                    GameEdge::Relation(r) => match r {
-                        Relation::NorthOf => format!("to the north is {}", target_name),
-                        Relation::SouthOf => format!("to the south is {}", target_name),
-                        Relation::EastOf => format!("to the east is {}", target_name),
-                        Relation::WestOf => format!("to the west is {}", target_name),
-                        Relation::Contains => format!("contains {}", target_name),
-                        Relation::OnTopOf => format!("on top of {}", target_name),
-                        Relation::NextTo => format!("next to {}", target_name),
-                        _ => format!("related to {}", target_name),
-                    },
-                    GameEdge::Connection(c) => match c {
-                        Connection::Door => format!("there is a door to {}", target_name),
-                        Connection::Passageway => format!("continues to {}", target_name),
-                        Connection::Window => format!("there is a window to {}", target_name),
-                    },
-                };
-
-                description.push_str(&format!("{}\n", phrase));
-            }
-        } else {
-            description.push_str("You are nowhere!\n");
-        }
-
-        description
+        self.thing_graph.describe_location(player_node)
     }
 }

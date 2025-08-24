@@ -94,7 +94,7 @@ fn draw_rpg_screen(frame: &mut Frame<'_>, game_state: &Res<GameState>) {
         .wrap(Wrap { trim: true });
     frame.render_widget(sidebar, horizontal_layout[1]);
 
-    let desc_text = game_state.describe_location();
+    let desc_text = game_state.describe_player_location();
 
     // Event / text feed
     let event_text = vec![Line::from(desc_text), Line::from("BLAH BLAH")];
