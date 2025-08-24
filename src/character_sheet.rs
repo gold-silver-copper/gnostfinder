@@ -12,7 +12,7 @@ pub struct CharacterSheet {
 impl Default for CharacterSheet {
     fn default() -> Self {
         CharacterSheet {
-            name: "Tol".into(),
+            name: "Tolstyj".into(),
             life_path: LifePath::default(),
             stats: Stats::default(),
         }

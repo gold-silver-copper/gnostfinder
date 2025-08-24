@@ -11,18 +11,16 @@ pub enum Thing {
 #[derive(Clone, Debug)]
 pub struct Location {
     pub name: String,
-    pub description: String,
+
     pub kind: LocationType,
 }
 
 /// Type of location (helps categorize behavior, appearance, etc.)
 #[derive(Clone, Debug)]
 pub enum LocationType {
-    Town,
     Room,
-    Tavern,
-    Forest,
-    Dungeon,
+    Hall,
+    Street,
 }
 
 /// An item in the world.
@@ -42,41 +40,53 @@ pub enum ItemType {
 }
 
 pub type ThingGraph = Graph<Thing, GameEdge>;
-
-/// High-level edge between two `Thing`s in the world graph.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum GameEdge {
-    Passage(PassageType),
-    Relation(RelationType),
+    Relation(Relation),
+    Connection(Connection),
 }
 
-/// Connections that represent traversable passages.
-#[derive(Debug, Clone)]
-pub enum PassageType {
+/// Edge types for spatial relations between entities in the game world.
+///
+/// Combines:
+/// - RCC-8 style topology (containment, touching, overlap).
+/// - Cardinal directions (north, south, etc.).
+/// - Relative orientation (left/right, above/below).
+/// - Functional/contact (on top of, attached to, next to).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Relation {
+    // --- Topological (RCC-like) ---
+    Contains, // A contains B
+
+    // --- Cardinal / Directional ---
+    NorthOf,
+    SouthOf,
+    EastOf,
+    WestOf,
+
+    // --- Relative / Orientation ---
+    Above,
+    Below,
+
+    // --- Functional / Contact ---
+    OnTopOf,    // A is physically supported by B
+    Underneath, // A is beneath and supported by B
+    AttachedTo, // A is fastened to B (painting on wall)
+    NextTo,     // A is adjacent to B without overlap
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Connection {
     Door,
+    Passageway,
     Window,
-    Street,
-    Tunnel,
-    Stairs,
-}
-
-/// Connections that represent spatial or conceptual relations.
-#[derive(Debug, Clone)]
-pub enum RelationType {
-    At,
-    NextTo,
-    OnTopOf,
-    Under,
-    Inside,
-    Behind,
 }
 
 impl Thing {
     /// Create a new location.
-    pub fn new_location(name: &str, description: &str, kind: LocationType) -> Self {
+    pub fn new_location(name: &str, kind: LocationType) -> Self {
         Thing::Location(Location {
             name: name.to_string(),
-            description: description.to_string(),
+
             kind,
         })
     }

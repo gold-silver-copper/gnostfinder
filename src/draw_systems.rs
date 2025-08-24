@@ -11,7 +11,7 @@ pub fn draw_menus_plugin(app: &mut App) {
 }
 
 /// Screen: RPG World
-fn draw_rpg_screen(mut context: ResMut<RatatuiContext>) {
+fn draw_rpg_screen(mut context: ResMut<RatatuiContext>, game_state: Res<GameState>) {
     let _ = context.draw(|frame| {
         let area = frame.area();
 
@@ -46,17 +46,17 @@ fn draw_rpg_screen(mut context: ResMut<RatatuiContext>) {
             Line::from("- Shield"),
             Line::from("- Potion x3"),
         ];
+        let player_name = game_state.thing_graph[game_state.player_id].name();
+
         let sidebar = Paragraph::new(sidebar_text)
-            .block(Block::default().title("Character").borders(Borders::ALL))
+            .block(Block::default().title(player_name).borders(Borders::ALL))
             .wrap(Wrap { trim: true });
         frame.render_widget(sidebar, horizontal_layout[1]);
 
+        let desc_text = game_state.describe_location();
+
         // Event / text feed
-        let event_text = vec![
-            Line::from("You enter a dark forest. The trees whisper around you."),
-            Line::from("A wild goblin appears!"),
-            Line::from("You can attack, defend, or flee."),
-        ];
+        let event_text = vec![Line::from(desc_text), Line::from("BLAH BLAH")];
         let events = Paragraph::new(event_text)
             .block(Block::default().title("Events").borders(Borders::ALL))
             .wrap(Wrap { trim: true });

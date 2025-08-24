@@ -1,4 +1,7 @@
+use petgraph::Direction;
+use petgraph::graph::Graph;
 use petgraph::graph::NodeIndex;
+use petgraph::visit::EdgeRef;
 
 use crate::*;
 
@@ -36,11 +39,21 @@ impl GameState {
     pub fn init_world(&mut self) {
         // 1. Create starting location
 
-        let town_node = self.thing_graph.add_node(Thing::new_location(
-            "Oakvale",
-            "A quiet town with cobbled streets.",
-            LocationType::Town,
-        ));
+        let room1 = self
+            .thing_graph
+            .add_node(Thing::new_location("Room1", LocationType::Room));
+        let room2 = self
+            .thing_graph
+            .add_node(Thing::new_location("Room2", LocationType::Room));
+        let hall = self
+            .thing_graph
+            .add_node(Thing::new_location("Hall", LocationType::Hall));
+        let lobby = self
+            .thing_graph
+            .add_node(Thing::new_location("Lobby", LocationType::Hall));
+        let street = self
+            .thing_graph
+            .add_node(Thing::new_location("street", LocationType::Street));
 
         // 2. Create player
 
@@ -50,36 +63,73 @@ impl GameState {
 
         self.player_id = player_node;
 
-        // 3. Create a starting item
-
-        let sword_node = self
-            .thing_graph
-            .add_node(Thing::new_item("Iron Sword", ItemType::Weapon));
-
         // 4. Connect player to location (Inside)
         self.thing_graph
-            .add_edge(player_node, town_node, GameEdge::Relation(RelationType::At));
-
-        // 5. Place item in location (Inside)
-        self.thing_graph
-            .add_edge(sword_node, town_node, GameEdge::Relation(RelationType::At));
+            .add_edge(player_node, room1, GameEdge::Relation(Relation::Contains));
 
         // 6. Optional: add another location and connect via a passage
 
-        let forest_node = self.thing_graph.add_node(Thing::new_location(
-            "Whispering Woods",
-            "The trees seem alive here.",
-            LocationType::Forest,
-        ));
-
-        self.thing_graph.add_edge(
-            town_node,
-            forest_node,
-            GameEdge::Passage(PassageType::Street),
-        );
+        self.thing_graph
+            .add_edge(room1, room2, GameEdge::Relation(Relation::NorthOf));
+        self.thing_graph
+            .add_edge(room1, hall, GameEdge::Connection(Connection::Door));
+        self.thing_graph
+            .add_edge(room2, hall, GameEdge::Connection(Connection::Door));
+        self.thing_graph
+            .add_edge(lobby, hall, GameEdge::Connection(Connection::Passageway));
+        self.thing_graph
+            .add_edge(lobby, street, GameEdge::Connection(Connection::Door));
 
         // Now you have a simple world graph:
-        // Town <-> Forest, Player and Sword inside Town
+    }
+    pub fn describe_location(&self) -> String {
+        let mut description = String::new();
+
+        // 1. Find where the player is (edge: player --Contains--> location)
+        let player_node = self.player_id;
+
+        let location = self
+            .thing_graph
+            .edges(player_node)
+            .find(|edge| *edge.weight() == GameEdge::Relation(Relation::Contains))
+            .map(|edge| edge.target());
+
+        if let Some(loc) = location {
+            let loc_name = self.thing_graph[loc].name();
+            description.push_str(&format!("You are in {}.\n", loc_name));
+
+            // 2. Look at edges FROM the location to other locations
+            for edge in self.thing_graph.edges(loc) {
+                let target = edge.target();
+                let edge_type = edge.weight();
+                let target_name = &self.thing_graph[target].name();
+
+                let relation = match edge_type {
+                    GameEdge::Relation(r) => match r {
+                        Relation::NorthOf => "to the north",
+                        Relation::SouthOf => "to the south",
+                        Relation::EastOf => "to the east",
+                        Relation::WestOf => "to the west",
+                        Relation::Contains => "contains",
+                        Relation::OnTopOf => "on top of",
+                        Relation::NextTo => "next to",
+                        _ => todo!(),
+                    },
+                    GameEdge::Connection(c) => match c {
+                        Connection::Door => "has door to",
+                        Connection::Passageway => "continues to",
+                        Connection::Window => "has a window to",
+                        // …whatever else you define
+                    },
+                };
+
+                description.push_str(&format!("{} is {}.\n", target_name, relation));
+            }
+        } else {
+            description.push_str("You are nowhere!\n");
+        }
+
+        description
     }
 
     fn input_handler(&mut self) {
