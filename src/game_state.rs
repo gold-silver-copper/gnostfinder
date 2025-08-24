@@ -67,11 +67,11 @@ impl GameState {
         // 6. Optional: add another location and connect via a passage
 
         self.thing_graph.add_north_south(room2, room1);
-        self.thing_graph.add_door(room1, hall);
-        self.thing_graph.add_door(room2, hall);
+        self.thing_graph.add_open_door(room1, hall);
+        self.thing_graph.add_open_door(room2, hall);
 
         self.thing_graph.add_passageway(hall, lobby);
-        self.thing_graph.add_door(lobby, street);
+        self.thing_graph.add_open_door(lobby, street);
 
         // Now you have a simple world graph:
     }

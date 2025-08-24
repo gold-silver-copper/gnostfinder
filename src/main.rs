@@ -17,6 +17,7 @@ mod character_sheet;
 use character_sheet::*;
 mod thing;
 mod thing_graph;
+use std::fmt;
 use thing_graph::*;
 
 use thing::*;

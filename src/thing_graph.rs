@@ -1,9 +1,9 @@
 use crate::*;
 
 pub trait MyGraph {
-    fn add_door(&mut self, a: NodeIndex, b: NodeIndex);
+    fn add_open_door(&mut self, a: NodeIndex, b: NodeIndex);
     fn add_passageway(&mut self, a: NodeIndex, b: NodeIndex);
-    fn add_window(&mut self, a: NodeIndex, b: NodeIndex);
+    fn add_open_window(&mut self, a: NodeIndex, b: NodeIndex);
 
     fn add_north_south(&mut self, north: NodeIndex, south: NodeIndex);
     fn add_east_west(&mut self, east: NodeIndex, west: NodeIndex);
@@ -26,7 +26,7 @@ impl MyGraph for ThingGraph {
 
         if let Some(loc) = location {
             let loc_name = self[loc].name();
-            description.push_str(&format!("You are in {}.\n", loc_name));
+            description.push_str(&format!("You are in {},", loc_name));
 
             // 2. Look at edges FROM the location to other locations
             for edge in self.edges(loc) {
@@ -36,7 +36,7 @@ impl MyGraph for ThingGraph {
 
                 let phrase = edge_type.describe_to(target_name);
 
-                description.push_str(&format!("{}\n", phrase));
+                description.push_str(&format!("{}, ", phrase));
             }
         } else {
             description.push_str("You are nowhere!\n");
@@ -45,9 +45,17 @@ impl MyGraph for ThingGraph {
         description
     }
     // --- Connections ---
-    fn add_door(&mut self, a: NodeIndex, b: NodeIndex) {
-        self.add_edge(a, b, GameEdge::Connection(Connection::Door));
-        self.add_edge(b, a, GameEdge::Connection(Connection::Door));
+    fn add_open_door(&mut self, a: NodeIndex, b: NodeIndex) {
+        self.add_edge(
+            a,
+            b,
+            GameEdge::Connection(Connection::Door(ConnectionState::Open)),
+        );
+        self.add_edge(
+            b,
+            a,
+            GameEdge::Connection(Connection::Door(ConnectionState::Open)),
+        );
     }
 
     fn add_passageway(&mut self, a: NodeIndex, b: NodeIndex) {
@@ -55,9 +63,17 @@ impl MyGraph for ThingGraph {
         self.add_edge(b, a, GameEdge::Connection(Connection::Passageway));
     }
 
-    fn add_window(&mut self, a: NodeIndex, b: NodeIndex) {
-        self.add_edge(a, b, GameEdge::Connection(Connection::Window));
-        self.add_edge(b, a, GameEdge::Connection(Connection::Window));
+    fn add_open_window(&mut self, a: NodeIndex, b: NodeIndex) {
+        self.add_edge(
+            a,
+            b,
+            GameEdge::Connection(Connection::Window(ConnectionState::Open)),
+        );
+        self.add_edge(
+            b,
+            a,
+            GameEdge::Connection(Connection::Window(ConnectionState::Open)),
+        );
     }
 
     // --- Cardinal directions ---
@@ -142,9 +158,30 @@ pub enum Relation {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Connection {
-    Door,
+    Door(ConnectionState),
     Passageway,
-    Window,
+    Window(ConnectionState),
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ConnectionState {
+    Open,
+    Closed,
+    BrokenOpen,
+    DestroyedClosed,
+    Locked,
+}
+
+impl fmt::Display for ConnectionState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let text = match self {
+            ConnectionState::Open => "open",
+            ConnectionState::Closed => "closed",
+            ConnectionState::BrokenOpen => "broken open",
+            ConnectionState::DestroyedClosed => "destroyed closed",
+            ConnectionState::Locked => "locked",
+        };
+        write!(f, "{}", text)
+    }
 }
 
 impl GameEdge {
@@ -178,9 +215,9 @@ impl Relation {
 impl Connection {
     fn describe_to(&self, target: &str) -> String {
         match self {
-            Connection::Door => format!("there is a door to {}", target),
+            Connection::Door(con_state) => format!("there is a {con_state} door to {}", target),
             Connection::Passageway => format!("continues to {}", target),
-            Connection::Window => format!("there is a window to {}", target),
+            Connection::Window(con_state) => format!("there is a {con_state} window to {}", target),
         }
     }
 }
