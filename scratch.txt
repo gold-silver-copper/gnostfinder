@@ -1,1 +1,21 @@
 You are in the center of the room. In the western part of the room, is an open window that looks onto the street.
+In the northern part of the room, is a staircase that leads to the second floor of the house.
+
+>go up stairs
+
+
+
+
+
+A-B-C
+|
+K
+|
+H-F
+   |\
+
+
+
+\|/
+-@-
+/|\

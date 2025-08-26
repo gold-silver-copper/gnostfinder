@@ -1,0 +1,13 @@
+You can meditate to regain mana.
+
+
+Combat
+---------
+Punch
+Kick
+Blade
+Hammer
+Bow and Arrow
+
+Health
+-------
