@@ -1,15 +1,37 @@
 use crate::*;
 
-pub trait NodeTrait {
+pub trait GameNode {
     fn name(&self) -> String;
 }
-pub trait EdgeTrait {}
+pub trait GameEdge {}
 
-pub struct GameGraph<N: NodeTrait, E: EdgeTrait>(pub Graph<N, E>);
+pub struct GameGraph<N: GameNode, E: GameEdge>(pub Graph<N, E>);
+pub type GamesGraph = Graph<dyn GameNode, dyn GameEdge>;
 
 #[derive(Clone, Debug)]
 pub enum MetaLocation {
     Tavern,
+}
+
+impl GameNode for MetaLocation {
+    fn name(&self) -> String {
+        format! {"{:#?}",self}
+    }
+}
+impl GameNode for Location {
+    fn name(&self) -> String {
+        format! {"{:#?}",self}
+    }
+}
+impl GameNode for Item {
+    fn name(&self) -> String {
+        format! {"{:#?}",self}
+    }
+}
+impl GameNode for Beast {
+    fn name(&self) -> String {
+        format! {"{:#?}",self}
+    }
 }
 
 /// Type of location (helps categorize behavior, appearance, etc.)
@@ -27,17 +49,12 @@ pub enum Item {
     Bar,
     Chair,
 }
+
 /// Type of item
 #[derive(Clone, Debug)]
 pub enum Beast {
     Human,
     Animal,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GameEdge {
-    Relation(Relation),
-    Connection(Connection),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
