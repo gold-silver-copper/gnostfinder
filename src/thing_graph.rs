@@ -1,7 +1,7 @@
 use crate::*;
 
 pub trait MyGraph {
-    fn add_open_door(&mut self, a: NodeIndex, b: NodeIndex);
+    fn add_door(&mut self, a: NodeIndex, b: NodeIndex);
     fn add_passageway(&mut self, a: NodeIndex, b: NodeIndex);
     fn add_open_window(&mut self, a: NodeIndex, b: NodeIndex);
 
@@ -22,7 +22,7 @@ impl MyGraph for ThingGraph {
 
         let location = self
             .edges(player_node)
-            .find(|edge| *edge.weight() == GameEdge::Relation(Relation::Contains))
+            .find(|edge| *edge.weight() == GameEdge::Relation(Relation::In))
             .map(|edge| edge.target());
 
         if let Some(loc) = location {
@@ -35,7 +35,7 @@ impl MyGraph for ThingGraph {
                 let edge_type = edge.weight();
                 let target_name = self[target].name(); // use display_name() if needed
 
-                let phrase = edge_type.describe_to(target_name);
+                let phrase = edge_type.describe_to(&target_name);
 
                 description.push_str(&format!("{}, ", phrase));
             }
@@ -46,17 +46,9 @@ impl MyGraph for ThingGraph {
         description
     }
     // --- Connections ---
-    fn add_open_door(&mut self, a: NodeIndex, b: NodeIndex) {
-        self.add_edge(
-            a,
-            b,
-            GameEdge::Connection(Connection::Door(ConnectionState::Open)),
-        );
-        self.add_edge(
-            b,
-            a,
-            GameEdge::Connection(Connection::Door(ConnectionState::Open)),
-        );
+    fn add_door(&mut self, a: NodeIndex, b: NodeIndex) {
+        self.add_edge(a, b, GameEdge::Connection(Connection::Door));
+        self.add_edge(b, a, GameEdge::Connection(Connection::Door));
     }
     fn part_of(&mut self, a: NodeIndex, b: NodeIndex) {
         self.add_edge(b, a, GameEdge::Relation(Relation::PartOf));
@@ -68,30 +60,6 @@ impl MyGraph for ThingGraph {
     fn add_passageway(&mut self, a: NodeIndex, b: NodeIndex) {
         self.add_edge(a, b, GameEdge::Connection(Connection::Passageway));
         self.add_edge(b, a, GameEdge::Connection(Connection::Passageway));
-    }
-
-    fn add_open_window(&mut self, a: NodeIndex, b: NodeIndex) {
-        self.add_edge(
-            a,
-            b,
-            GameEdge::Connection(Connection::Window(ConnectionState::Open)),
-        );
-        self.add_edge(
-            b,
-            a,
-            GameEdge::Connection(Connection::Window(ConnectionState::Open)),
-        );
-    }
-
-    // --- Cardinal directions ---
-    fn add_north_south(&mut self, north: NodeIndex, south: NodeIndex) {
-        self.add_edge(north, south, GameEdge::Relation(Relation::SouthOf));
-        self.add_edge(south, north, GameEdge::Relation(Relation::NorthOf));
-    }
-
-    fn add_east_west(&mut self, east: NodeIndex, west: NodeIndex) {
-        self.add_edge(east, west, GameEdge::Relation(Relation::WestOf));
-        self.add_edge(west, east, GameEdge::Relation(Relation::EastOf));
     }
 }
 
@@ -111,52 +79,15 @@ pub enum GameEdge {
 /// - Functional/contact (on top of, attached to, next to).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Relation {
-    // --- Topological (RCC-like) ---
-    Contains, // A contains B (physical)
-    PartOf,   //A is part of b (metaphysical)
-
-    // --- Cardinal / Directional ---
-    NorthOf,
-    SouthOf,
-    EastOf,
-    WestOf,
-
-    // --- Relative / Orientation ---
-    Above,
-    Below,
-
-    // --- Functional / Contact ---
-    OnTopOf,    // A is physically supported by B
-    Underneath, // A is beneath and supported by B
-    AttachedTo, // A is fastened to B (painting on wall)
-    NextTo,     // A is adjacent to B without overlap
+    Of,
+    In,
+    Sitting,
+    At,
+    On,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Connection {
-    Door(ConnectionState),
-    Passageway,
-    Window(ConnectionState),
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum ConnectionState {
-    Open,
-    Closed,
-    BrokenOpen,
-    DestroyedClosed,
-    Locked,
-}
-
-impl fmt::Display for ConnectionState {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let text = match self {
-            ConnectionState::Open => "open",
-            ConnectionState::Closed => "closed",
-            ConnectionState::BrokenOpen => "broken open",
-            ConnectionState::DestroyedClosed => "destroyed closed",
-            ConnectionState::Locked => "locked",
-        };
-        write!(f, "{}", text)
-    }
+    Door,
 }
 
 impl GameEdge {

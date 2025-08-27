@@ -19,8 +19,6 @@ mod thing;
 mod thing_graph;
 use std::fmt;
 use thing_graph::*;
-mod game_graph;
-use game_graph::*;
 
 use thing::*;
 fn main() {

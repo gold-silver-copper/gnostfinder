@@ -2,72 +2,70 @@ use crate::*;
 
 #[derive(Clone, Debug)]
 pub enum Thing {
-    MetaLocation { name: String, meta: MetaLocation },
-    Location { name: String, typik: LocationType },
-    Person(CharacterSheet),
-    Item { name: String, typik: ItemType },
+    MetaLocation(MetaLocation),
+    Location(Location),
+    Beast(Beast),
+    Item(Item),
 }
 #[derive(Clone, Debug)]
 pub enum MetaLocation {
-    House,
-    City,
-    Street,
+    Tavern,
 }
-
 /// Type of location (helps categorize behavior, appearance, etc.)
 #[derive(Clone, Debug)]
-pub enum LocationType {
-    Room,
-    Hall,
-    StreetSection,
+pub enum Location {
+    CommonRoom,
+    GuestRoom,
 }
 
 /// Type of item
 #[derive(Clone, Debug)]
-pub enum ItemType {
-    Weapon,
-    Armor,
-    Potion,
-    Key,
+pub enum Item {
+    Cup,
+    Table,
+    Bar,
+    Chair,
+}
+/// Type of item
+#[derive(Clone, Debug)]
+pub enum Beast {
+    Human,
+    Animal,
+}
+
+pub trait GameNode {
+    fn name(&self) -> String;
+}
+
+impl GameNode for MetaLocation {
+    fn name(&self) -> String {
+        format! {"{:#?}",self}
+    }
+}
+impl GameNode for Location {
+    fn name(&self) -> String {
+        format! {"{:#?}",self}
+    }
+}
+impl GameNode for Item {
+    fn name(&self) -> String {
+        format! {"{:#?}",self}
+    }
+}
+impl GameNode for Beast {
+    fn name(&self) -> String {
+        format! {"{:#?}",self}
+    }
 }
 
 impl Thing {
-    /// Create a new meta-location.
-    pub fn new_meta_location(name: &str, meta: MetaLocation) -> Self {
-        Thing::MetaLocation {
-            name: name.to_string(),
-            meta,
-        }
-    }
-
-    /// Create a new location.
-    pub fn new_location(name: &str, typik: LocationType) -> Self {
-        Thing::Location {
-            name: name.to_string(),
-            typik,
-        }
-    }
-
-    /// Create a new person.
-    pub fn new_person(cs: CharacterSheet) -> Self {
-        Thing::Person(cs)
-    }
-
-    /// Create a new item.
-    pub fn new_item(name: &str, kind: ItemType) -> Self {
-        Thing::Item {
-            name: name.to_string(),
-            typik: kind,
-        }
-    }
-
     /// Get the "display name" of the thing.
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> String {
         match self {
-            Thing::Location { name, .. } => name.as_str(),
-            Thing::Person(person) => &person.name,
-            Thing::Item { name, .. } => name.as_str(),
-            Thing::MetaLocation { name, .. } => name.as_str(),
+            Thing::Location(x) => x.name(),
+            Thing::Beast(x) => x.name(),
+            Thing::Item(x) => x.name(),
+            Thing::MetaLocation(x) => x.name(),
         }
     }
 }
