@@ -11,3 +11,5 @@ Bow and Arrow
 
 Health
 -------
+Blood Points/ Minimum amount of blood neccesary to keep moving
+Mana has a max and can be recharged by meditating and with time

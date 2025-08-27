@@ -1,3 +1,43 @@
+
+You are in the lobby of a tavern, sitting on a chair at a mahogany table. On the table is a copper mug of barley beer.
+
+People
+--------
+Jacob the Wicked sits at an oak table.
+Liza the Old stands behind the bar.
+
+
+Furniture and Items
+---------------------
+
+
+
+Connections
+-------------
+There is a door leading to the streets of the town.
+There is a staircase leading up to the rooms.
+
+
+>take beer
+>talk to Jacob
+
+You stand in the tavern.
+You stand at the bar in the tavern.
+You sit at a table in the tavern.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 You are in the center of the room. In the western part of the room, is an open window that looks onto the street.
 In the northern part of the room, is a staircase that leads to the second floor of the house.
 
