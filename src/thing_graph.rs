@@ -1,46 +1,54 @@
+use petgraph::{
+    algo::astar,
+    visit::{Dfs, Reversed},
+};
+
 use crate::*;
 
 pub trait MyGraph {
     fn add_door(&mut self, a: NodeIndex, b: NodeIndex);
-    fn add_passageway(&mut self, a: NodeIndex, b: NodeIndex);
-    fn add_open_window(&mut self, a: NodeIndex, b: NodeIndex);
-
-    fn add_north_south(&mut self, north: NodeIndex, south: NodeIndex);
-    fn add_east_west(&mut self, east: NodeIndex, west: NodeIndex);
-    fn part_of(&mut self, a: NodeIndex, b: NodeIndex);
-    fn contained_by(&mut self, a: NodeIndex, b: NodeIndex);
 
     fn describe_location(&self, thing_id: NodeIndex) -> String;
 }
 
 impl MyGraph for ThingGraph {
     fn describe_location(&self, thing_id: NodeIndex) -> String {
-        let mut description = String::new();
+        let mut description = String::from("You are ");
+        let mut in_id = None;
 
-        // 1. Find where the player is (edge: player --Contains--> location)
-        let player_node = thing_id;
-
-        let location = self
-            .edges(player_node)
-            .find(|edge| *edge.weight() == GameEdge::Relation(Relation::In))
-            .map(|edge| edge.target());
-
-        if let Some(loc) = location {
-            let loc_name = self[loc].name();
-            description.push_str(&format!("You are in {},", loc_name));
-
-            // 2. Look at edges FROM the location to other locations
-            for edge in self.edges(loc) {
+        let mut dfs = Dfs::new(&self, thing_id);
+        while let Some(nx) = dfs.next(&self) {
+            let edges = self.edges(nx);
+            for edge in edges {
                 let target = edge.target();
-                let edge_type = edge.weight();
                 let target_name = self[target].name(); // use display_name() if needed
-
+                let edge_type = edge.weight();
                 let phrase = edge_type.describe_to(&target_name);
+                if edge_type == &GameEdge::Relation(Relation::In) {
+                    in_id = Some(target);
+                }
 
                 description.push_str(&format!("{}, ", phrase));
             }
-        } else {
-            description.push_str("You are nowhere!\n");
+        }
+        description.push_str(&format!("                        "));
+
+        if let Some(in_id) = in_id {
+            let reversed = Reversed(self);
+            let mut dfs = Dfs::new(&reversed, in_id);
+            while let Some(nx) = dfs.next(&reversed) {
+                let edges = self.edges(nx);
+                for edge in edges {
+                    let source = edge.source();
+                    let source_name = self[source].name(); // use display_name() if needed
+                    let target = edge.target();
+                    let target_name = self[target].name(); // use display_name() if needed
+                    let edge_type = edge.weight();
+                    let phrase = edge_type.describe_to(&target_name);
+
+                    description.push_str(&format!("{source_name} {}, ", phrase));
+                }
+            }
         }
 
         description
@@ -49,17 +57,6 @@ impl MyGraph for ThingGraph {
     fn add_door(&mut self, a: NodeIndex, b: NodeIndex) {
         self.add_edge(a, b, GameEdge::Connection(Connection::Door));
         self.add_edge(b, a, GameEdge::Connection(Connection::Door));
-    }
-    fn part_of(&mut self, a: NodeIndex, b: NodeIndex) {
-        self.add_edge(b, a, GameEdge::Relation(Relation::PartOf));
-    }
-    fn contained_by(&mut self, a: NodeIndex, b: NodeIndex) {
-        self.add_edge(a, b, GameEdge::Relation(Relation::Contains));
-    }
-
-    fn add_passageway(&mut self, a: NodeIndex, b: NodeIndex) {
-        self.add_edge(a, b, GameEdge::Connection(Connection::Passageway));
-        self.add_edge(b, a, GameEdge::Connection(Connection::Passageway));
     }
 }
 
@@ -84,6 +81,7 @@ pub enum Relation {
     Sitting,
     At,
     On,
+    Behind,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Connection {
@@ -103,18 +101,12 @@ impl GameEdge {
 impl Relation {
     fn describe_to(&self, target: &str) -> String {
         match self {
-            Relation::NorthOf => format!("to the north is {}", target),
-            Relation::SouthOf => format!("to the south is {}", target),
-            Relation::EastOf => format!("to the east is {}", target),
-            Relation::WestOf => format!("to the west is {}", target),
-            Relation::Contains => format!("contains {}", target),
-            Relation::PartOf => format!("is part of {}", target),
-            Relation::OnTopOf => format!("on top of {}", target),
-            Relation::NextTo => format!("next to {}", target),
-            Relation::Above => format!("above {}", target),
-            Relation::Below => format!("below {}", target),
-            Relation::Underneath => format!("underneath {}", target),
-            Relation::AttachedTo => format!("attached to {}", target),
+            Relation::Of => format!("of {}", target),
+            Relation::In => format!("in {}", target),
+            Relation::Sitting => format!("sitting {}", target),
+            Relation::At => format!("at {}", target),
+            Relation::On => format!("on {}", target),
+            Relation::Behind => format!("behind {}", target),
         }
     }
 }
@@ -122,9 +114,7 @@ impl Relation {
 impl Connection {
     fn describe_to(&self, target: &str) -> String {
         match self {
-            Connection::Door(con_state) => format!("there is a {con_state} door to {}", target),
-            Connection::Passageway => format!("continues to {}", target),
-            Connection::Window(con_state) => format!("there is a {con_state} window to {}", target),
+            Connection::Door => format!("door to {}", target),
         }
     }
 }

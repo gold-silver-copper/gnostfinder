@@ -36,42 +36,42 @@ impl GameState {
     pub fn init_world(&mut self) {
         // 1. Create starting location
 
-        let room1 = self
+        let room = self
             .thing_graph
-            .add_node(Thing::new_location("Room1", LocationType::Room));
-        let room2 = self
+            .add_node(Thing::Location(Location::CommonRoom));
+        let tavern = self
             .thing_graph
-            .add_node(Thing::new_location("Room2", LocationType::Room));
-        let hall = self
-            .thing_graph
-            .add_node(Thing::new_location("Hall", LocationType::Hall));
-        let lobby = self
-            .thing_graph
-            .add_node(Thing::new_location("Lobby", LocationType::Hall));
-        let street = self
-            .thing_graph
-            .add_node(Thing::new_location("street", LocationType::StreetSection));
+            .add_node(Thing::MetaLocation(MetaLocation::Tavern));
 
         // 2. Create player
 
-        let player_node = self
-            .thing_graph
-            .add_node(Thing::new_person(CharacterSheet::default()));
+        let player_node = self.thing_graph.add_node(Thing::Beast(Beast::Human));
+        let liz = self.thing_graph.add_node(Thing::Beast(Beast::Human));
 
         self.player_id = player_node;
 
-        self.thing_graph.contained_by(player_node, room1);
+        let cup = self.thing_graph.add_node(Thing::Item(Item::Cup));
+        let table = self.thing_graph.add_node(Thing::Item(Item::Table));
+        let bar = self.thing_graph.add_node(Thing::Item(Item::Bar));
+        let chair = self.thing_graph.add_node(Thing::Item(Item::Chair));
 
-        // 6. Optional: add another location and connect via a passage
+        self.thing_graph
+            .add_edge(liz, bar, GameEdge::Relation(Relation::Behind));
+        self.thing_graph
+            .add_edge(cup, table, GameEdge::Relation(Relation::On));
+        self.thing_graph
+            .add_edge(player_node, chair, GameEdge::Relation(Relation::Sitting));
+        self.thing_graph
+            .add_edge(chair, table, GameEdge::Relation(Relation::At));
 
-        self.thing_graph.add_north_south(room2, room1);
-        self.thing_graph.add_open_door(room1, hall);
-        self.thing_graph.add_open_door(room2, hall);
+        self.thing_graph
+            .add_edge(room, tavern, GameEdge::Relation(Relation::Of));
 
-        self.thing_graph.add_passageway(hall, lobby);
-        self.thing_graph.add_open_door(lobby, street);
+        self.thing_graph
+            .add_edge(table, room, GameEdge::Relation(Relation::In));
 
-        // Now you have a simple world graph:
+        self.thing_graph
+            .add_edge(bar, room, GameEdge::Relation(Relation::In));
     }
     pub fn describe_player_location(&self) -> String {
         let player_node = self.player_id;
