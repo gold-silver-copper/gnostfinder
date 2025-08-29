@@ -46,6 +46,7 @@ impl GameState {
         // 2. Create player
 
         let player_node = self.thing_graph.add_node(Thing::Beast(Beast::Human));
+        let rat = self.thing_graph.add_node(Thing::Beast(Beast::Animal));
         let liz = self.thing_graph.add_node(Thing::Beast(Beast::Human));
 
         self.player_id = player_node;
@@ -60,12 +61,14 @@ impl GameState {
         self.thing_graph
             .add_edge(cup, table, GameEdge::Relation(Relation::On));
         self.thing_graph
+            .add_edge(chair, rat, GameEdge::Relation(Relation::On));
+        self.thing_graph
             .add_edge(player_node, chair, GameEdge::Relation(Relation::Sitting));
         self.thing_graph
             .add_edge(chair, table, GameEdge::Relation(Relation::At));
 
         self.thing_graph
-            .add_edge(room, tavern, GameEdge::Relation(Relation::Of));
+            .add_edge(room, tavern, GameEdge::Relation(Relation::OfMeta));
 
         self.thing_graph
             .add_edge(table, room, GameEdge::Relation(Relation::In));

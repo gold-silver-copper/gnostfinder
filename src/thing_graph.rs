@@ -1,5 +1,6 @@
 use petgraph::{
-    algo::astar,
+    algo::{Measure, astar},
+    prelude::StableDiGraph,
     visit::{Dfs, Reversed},
 };
 
@@ -21,18 +22,28 @@ impl MyGraph for ThingGraph {
             let edges = self.edges(nx);
             for edge in edges {
                 let target = edge.target();
-                let target_name = self[target].name(); // use display_name() if needed
-                let edge_type = edge.weight();
-                let phrase = edge_type.describe_to(&target_name);
-                if edge_type == &GameEdge::Relation(Relation::In) {
+
+                if edge.weight() == &GameEdge::Relation(Relation::OfMeta) {
                     in_id = Some(target);
                 }
+            }
+        }
 
-                description.push_str(&format!("{}, ", phrase));
+        if let Some(in_id) = in_id {
+            if let Some(edge_star) = astar_with_edges(self, thing_id, |f| f == in_id, |_| 1, |_| 0)
+            {
+                for (source, edge_type, target) in edge_star {
+                    let source_name = self[source].name(); // use display_name() if needed
+
+                    let target_name = self[target].name(); // use display_name() if needed
+
+                    let phrase = edge_type.describe_to(&target_name);
+
+                    description.push_str(&format!("{source_name} {}, ", phrase));
+                }
             }
         }
         description.push_str(&format!("                        "));
-
         if let Some(in_id) = in_id {
             let reversed = Reversed(self);
             let mut dfs = Dfs::new(&reversed, in_id);
@@ -60,7 +71,7 @@ impl MyGraph for ThingGraph {
     }
 }
 
-pub type ThingGraph = Graph<Thing, GameEdge>;
+pub type ThingGraph = StableDiGraph<Thing, GameEdge>;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum GameEdge {
     Relation(Relation),
@@ -76,7 +87,7 @@ pub enum GameEdge {
 /// - Functional/contact (on top of, attached to, next to).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Relation {
-    Of,
+    OfMeta,
     In,
     Sitting,
     At,
@@ -101,7 +112,7 @@ impl GameEdge {
 impl Relation {
     fn describe_to(&self, target: &str) -> String {
         match self {
-            Relation::Of => format!("of {}", target),
+            Relation::OfMeta => format!("of {}", target),
             Relation::In => format!("in {}", target),
             Relation::Sitting => format!("sitting {}", target),
             Relation::At => format!("at {}", target),
@@ -116,5 +127,43 @@ impl Connection {
         match self {
             Connection::Door => format!("door to {}", target),
         }
+    }
+}
+
+fn astar_with_edges<N, E, FN, IN, FS, K>(
+    graph: &StableDiGraph<N, E>,
+    start: NodeIndex,
+    is_goal: FN,
+    mut edge_cost: FS,
+    mut estimate: IN,
+) -> Option<Vec<(NodeIndex, E, NodeIndex)>>
+where
+    N: Clone,
+    E: Clone,
+    K: std::ops::Add<Output = K> + Ord + Copy + Default + Measure,
+    FN: Fn(NodeIndex) -> bool,
+    IN: FnMut(NodeIndex) -> K,
+    FS: FnMut(&E) -> K,
+{
+    if let Some((_, nodes)) = astar(
+        graph,
+        start,
+        is_goal,
+        |e| edge_cost(e.weight()),
+        |n| estimate(n),
+    ) {
+        // Convert node path to edge-annotated path
+        let mut path_with_edges = Vec::new();
+        for w in nodes.windows(2) {
+            if let [a, b] = *w {
+                if let Some(edge_ref) = graph.find_edge(a, b) {
+                    let edge_weight = graph.edge_weight(edge_ref).unwrap().clone();
+                    path_with_edges.push((a, edge_weight, b));
+                }
+            }
+        }
+        Some(path_with_edges)
+    } else {
+        None
     }
 }
