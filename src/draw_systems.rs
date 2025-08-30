@@ -55,6 +55,8 @@ fn draw_movement_screen(frame: &mut Frame<'_>, _game_state: &Res<GameState>) {
 /// Screen: RPG World
 fn draw_rpg_screen(frame: &mut Frame<'_>, game_state: &Res<GameState>) {
     let area = frame.area();
+    let bg = Block::default().style(Style::default().bg(Color::Black));
+    frame.render_widget(bg, area);
 
     // Split screen into main body + command bar
     let vertical_layout = Layout::default()

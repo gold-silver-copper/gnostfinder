@@ -61,6 +61,12 @@ impl MyGraph for ThingGraph {
                 }
             }
         }
+        description.push_str(&format!("                        "));
+        let boop = source_nodes(self);
+        for x in boop {
+            let source_name = self[x].name(); // use display_name() if needed
+            description.push_str(&format!(" sources {source_name}  "));
+        }
 
         description
     }
@@ -166,4 +172,11 @@ where
     } else {
         None
     }
+}
+
+fn source_nodes<N, E>(graph: &StableDiGraph<N, E>) -> Vec<NodeIndex> {
+    graph
+        .node_indices()
+        .filter(|&n| graph.neighbors_directed(n, Direction::Incoming).count() == 0)
+        .collect()
 }
