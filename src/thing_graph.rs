@@ -180,3 +180,15 @@ fn source_nodes<N, E>(graph: &StableDiGraph<N, E>) -> Vec<NodeIndex> {
         .filter(|&n| graph.neighbors_directed(n, Direction::Incoming).count() == 0)
         .collect()
 }
+
+fn terminal_nodes<N, E>(graph: &StableDiGraph<N, E>) -> Vec<NodeIndex> {
+    graph
+        .node_indices()
+        .filter(|&n| {
+            graph
+                .neighbors_directed(n, petgraph::Direction::Outgoing)
+                .count()
+                == 0
+        })
+        .collect()
+}
