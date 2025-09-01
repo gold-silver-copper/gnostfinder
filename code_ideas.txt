@@ -1,0 +1,4 @@
+sentence_builder(sentence_subject, )
+
+let subject = player node, generate DFS sentence.
+Move to next thing on DFS path, set it as subject, generate new dfs sentence. Do this recursively, switching to new source node once branch exhausts.

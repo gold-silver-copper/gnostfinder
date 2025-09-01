@@ -19,6 +19,10 @@ mod thing;
 mod thing_graph;
 use std::fmt;
 use thing_graph::*;
+mod sentence_former;
+use bevy::platform::collections::HashSet;
+use english::*;
+use sentence_former::*;
 
 use thing::*;
 fn main() {

@@ -1,0 +1,11 @@
+llm based text game system, where every stat is determined by llm based on previous llm output
+somethign like
+
+"things happen in which character picks up an item"
+output text fed to llm2, also is fed the previous inventory state
+new inventory state generated
+
+eventreadperspective
+Firstperson(player_id)
+Secondperson(player_id)
+ThirdPerson // reqyuures no id

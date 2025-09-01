@@ -14,7 +14,6 @@ pub trait MyGraph {
 
 impl MyGraph for ThingGraph {
     fn describe_location(&self, thing_id: NodeIndex) -> String {
-        let mut description = String::from("You are ");
         let mut in_id = None;
 
         let mut dfs = Dfs::new(&self, thing_id);
@@ -32,15 +31,8 @@ impl MyGraph for ThingGraph {
         if let Some(in_id) = in_id {
             if let Some(edge_star) = astar_with_edges(self, thing_id, |f| f == in_id, |_| 1, |_| 0)
             {
-                for (source, edge_type, target) in edge_star {
-                    let source_name = self[source].name(); // use display_name() if needed
-
-                    let target_name = self[target].name(); // use display_name() if needed
-
-                    let phrase = edge_type.describe_to(&target_name);
-
-                    description.push_str(&format!("{source_name} {}, ", phrase));
-                }
+                let sent = astar_sentence(self, edge_star, thing_id);
+                description.push_str(&sent);
             }
         }
         description.push_str(&format!("                        "));
@@ -113,6 +105,12 @@ impl GameEdge {
             GameEdge::Connection(c) => c.describe_to(target),
         }
     }
+    pub fn get_word(&self) -> &'static str {
+        match self {
+            GameEdge::Relation(r) => r.get_word(),
+            GameEdge::Connection(c) => c.get_word(),
+        }
+    }
 }
 
 impl Relation {
@@ -126,12 +124,27 @@ impl Relation {
             Relation::Behind => format!("behind {}", target),
         }
     }
+    fn get_word(&self) -> &'static str {
+        match self {
+            Relation::OfMeta => "of",
+            Relation::In => "in",
+            Relation::Sitting => "sit",
+            Relation::At => "at",
+            Relation::On => "on",
+            Relation::Behind => "behind",
+        }
+    }
 }
 
 impl Connection {
     fn describe_to(&self, target: &str) -> String {
         match self {
             Connection::Door => format!("door to {}", target),
+        }
+    }
+    fn get_word(&self) -> &'static str {
+        match self {
+            Connection::Door => "door",
         }
     }
 }
