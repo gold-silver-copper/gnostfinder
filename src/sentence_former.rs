@@ -32,7 +32,7 @@ pub fn astar_sentence(
         };
 
         if first_iter {
-            description.push_str(&format!("{source_name} "));
+            description.push_str(&format!("{source_name}"));
             first_iter = false;
         }
 
@@ -40,7 +40,7 @@ pub fn astar_sentence(
 
         let phrase = edge_type.get_word();
 
-        description.push_str(&format!(" {phrase} {determiner} {target_name}, "));
+        description.push_str(&format!(" {phrase} {determiner} {target_name}"));
         mentioned_nodes.insert(source);
         mentioned_nodes.insert(target);
     }

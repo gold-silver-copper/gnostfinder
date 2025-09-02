@@ -1,0 +1,5 @@
+Base location unit is near zones, zones in which all entities are more or less within hand to hand distance.
+Higherlevel metalocations are all built up out of zones.
+In roguelike terms, a hand to hand zone, is approximately 3x3 grid.
+
+If a player owns something, use the determiner your.

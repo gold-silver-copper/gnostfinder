@@ -15,7 +15,7 @@ pub trait MyGraph {
 impl MyGraph for ThingGraph {
     fn describe_location(&self, thing_id: NodeIndex) -> String {
         let mut in_id = None;
-
+        let mut description = String::new();
         let mut dfs = Dfs::new(&self, thing_id);
         while let Some(nx) = dfs.next(&self) {
             let edges = self.edges(nx);
