@@ -18,7 +18,6 @@ pub type MyIndex = NodeIndex<u32>;
 // Menu structure
 #[derive(Resource)]
 pub struct GameState {
-    pub last_input: LastInput,
     pub input_state: InputState,
     pub player_id: MyIndex,
     pub thing_graph: ThingGraph,
@@ -28,7 +27,6 @@ pub struct GameState {
 impl GameState {
     pub fn new() -> Self {
         let mut gs = GameState {
-            last_input: LastInput::None,
             input_state: InputState::Main,
             player_id: MyIndex::new(0),
             thing_graph: ThingGraph::new(),
@@ -37,9 +35,7 @@ impl GameState {
         gs.init_world();
         gs
     }
-    fn run(&mut self) {
-        self.input_handler();
-    }
+    fn run(&mut self) {}
 
     pub fn init_world(&mut self) {
         // 1. Create starting location

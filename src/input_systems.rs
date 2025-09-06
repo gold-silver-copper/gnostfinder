@@ -17,8 +17,8 @@ pub enum InputState {
 }
 
 impl GameState {
-    fn handle_main_input(&mut self) {
-        match self.last_input {
+    fn handle_main_input(&mut self, my_input: LastInput) {
+        match my_input {
             LastInput::Down => (),
             LastInput::Up => (),
             LastInput::Select => (),
@@ -29,8 +29,8 @@ impl GameState {
             _ => {}
         }
     }
-    fn handle_movement_input(&mut self) {
-        match self.last_input {
+    fn handle_movement_input(&mut self, my_input: LastInput) {
+        match my_input {
             LastInput::Down => (),
             LastInput::Up => (),
             LastInput::Select => (),
@@ -40,13 +40,13 @@ impl GameState {
         }
     }
 
-    pub fn input_handler(&mut self) {
+    pub fn input_handler(&mut self, my_input: LastInput) {
         match self.input_state {
             InputState::Main => {
-                self.handle_main_input();
+                self.handle_main_input(my_input);
             }
             InputState::Movement => {
-                self.handle_movement_input();
+                self.handle_movement_input(my_input);
             }
         }
     }
@@ -59,26 +59,27 @@ pub fn input_systems_plugin(app: &mut App) {
 
 /// Handles input when in the menu.
 fn input_handler(keys: Res<ButtonInput<KeyCode>>, mut game_state: ResMut<GameState>) {
-    game_state.last_input = LastInput::None;
+    let mut my_input = LastInput::None;
     if keys.just_pressed(KeyCode::ArrowDown) || keys.just_pressed(KeyCode::KeyS) {
-        game_state.last_input = LastInput::Down;
+        my_input = LastInput::Down;
     }
     if keys.just_pressed(KeyCode::ArrowUp) || keys.just_pressed(KeyCode::KeyW) {
-        game_state.last_input = LastInput::Up;
+        my_input = LastInput::Up;
     }
     if keys.just_pressed(KeyCode::ArrowLeft) || keys.just_pressed(KeyCode::KeyA) {
-        game_state.last_input = LastInput::Left;
+        my_input = LastInput::Left;
     }
     if keys.just_pressed(KeyCode::ArrowRight) || keys.just_pressed(KeyCode::KeyD) {
-        game_state.last_input = LastInput::Right;
+        my_input = LastInput::Right;
     }
     if keys.just_pressed(KeyCode::Enter) {
-        game_state.last_input = LastInput::Select;
+        my_input = LastInput::Select;
     }
     if keys.just_pressed(KeyCode::KeyQ) {
-        game_state.last_input = LastInput::Back;
+        my_input = LastInput::Back;
     }
     if keys.just_pressed(KeyCode::KeyI) {
-        game_state.last_input = LastInput::Opt1;
+        my_input = LastInput::Opt1;
     }
+    game_state.input_handler(my_input);
 }
