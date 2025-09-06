@@ -2,14 +2,14 @@ use crate::*;
 
 pub fn astar_sentence(
     graph: &ThingGraph,
-    triples: Vec<(NodeIndex, GameEdge, NodeIndex)>,
-    perspective_id: NodeIndex,
+    triples: Vec<(MyIndex, GameEdge, MyIndex)>,
+    perspective_id: MyIndex,
 ) -> String {
     let mut description = String::new();
 
     let mut mentioned_nodes = HashSet::new();
 
-    let prev_target = NodeIndex::from(u32::MAX);
+    let prev_target = MyIndex::from(u32::MAX);
 
     let mut first_iter = true;
 

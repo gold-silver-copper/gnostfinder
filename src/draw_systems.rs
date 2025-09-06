@@ -1,4 +1,5 @@
 use crate::*;
+
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::{
     Frame,
@@ -77,18 +78,22 @@ fn draw_rpg_screen(frame: &mut Frame<'_>, game_state: &Res<GameState>) {
         .split(vertical_layout[0]);
 
     // Sidebar: Stats + Inventory
-    let sidebar_text = vec![
-        Line::from("Stats:"),
-        Line::from("HP: 100/100"),
-        Line::from("MP: 50/50"),
-        Line::from("Level: 1"),
-        Line::from("XP: 0"),
-        Line::from(""),
-        Line::from("Inventory:"),
-        Line::from("- Sword"),
-        Line::from("- Shield"),
-        Line::from("- Potion x3"),
-    ];
+    let mut sidebar_text = Vec::new();
+
+    for y in 0..10 {
+        let mut grid_string = String::new();
+        for x in 0..10 {
+            let current_coord = Coord { x, y };
+
+            if let Some(_node_index) = game_state.coord_map.get(&current_coord) {
+                grid_string.push('@'); // Draw something from the map
+            } else {
+                grid_string.push('.'); // Draw empty floor
+            }
+            grid_string.push(' '); // Add a space for better readability
+        }
+        sidebar_text.push(Line::from(grid_string));
+    }
     let player_name = game_state.thing_graph[game_state.player_id].name();
 
     let sidebar = Paragraph::new(sidebar_text)

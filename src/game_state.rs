@@ -8,14 +8,21 @@ fn game_state_run(mut game_state: ResMut<GameState>) {
 pub fn game_state_plugin(app: &mut App) {
     app.add_systems(Update, game_state_run);
 }
+#[derive(Debug, Hash, Clone, Copy, PartialEq, Eq)]
+pub struct Coord {
+    pub x: i32,
+    pub y: i32,
+}
 
+pub type MyIndex = NodeIndex<u32>;
 // Menu structure
 #[derive(Resource)]
 pub struct GameState {
     pub last_input: LastInput,
     pub input_state: InputState,
-    pub player_id: NodeIndex,
+    pub player_id: MyIndex,
     pub thing_graph: ThingGraph,
+    pub coord_map: FxHashMap<Coord, MyIndex>,
 }
 
 impl GameState {
@@ -23,8 +30,9 @@ impl GameState {
         let mut gs = GameState {
             last_input: LastInput::None,
             input_state: InputState::Main,
-            player_id: NodeIndex::new(0),
+            player_id: MyIndex::new(0),
             thing_graph: ThingGraph::new(),
+            coord_map: FxHashMap::default(),
         };
         gs.init_world();
         gs
@@ -46,6 +54,9 @@ impl GameState {
         // 2. Create player
 
         let player_node = self.thing_graph.add_node(Thing::Beast(Beast::Human));
+
+        self.coord_map.insert(Coord { x: 1, y: 1 }, player_node);
+
         let rat = self.thing_graph.add_node(Thing::Beast(Beast::Animal));
         let liz = self.thing_graph.add_node(Thing::Beast(Beast::Human));
 

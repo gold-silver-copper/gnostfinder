@@ -7,13 +7,13 @@ use petgraph::{
 use crate::*;
 
 pub trait MyGraph {
-    fn add_door(&mut self, a: NodeIndex, b: NodeIndex);
+    fn add_door(&mut self, a: MyIndex, b: MyIndex);
 
-    fn describe_location(&self, thing_id: NodeIndex) -> String;
+    fn describe_location(&self, thing_id: MyIndex) -> String;
 }
 
 impl MyGraph for ThingGraph {
-    fn describe_location(&self, thing_id: NodeIndex) -> String {
+    fn describe_location(&self, thing_id: MyIndex) -> String {
         let mut in_id = None;
         let mut description = String::new();
         let mut dfs = Dfs::new(&self, thing_id);
@@ -63,7 +63,7 @@ impl MyGraph for ThingGraph {
         description
     }
     // --- Connections ---
-    fn add_door(&mut self, a: NodeIndex, b: NodeIndex) {
+    fn add_door(&mut self, a: MyIndex, b: MyIndex) {
         self.add_edge(a, b, GameEdge::Connection(Connection::Door));
         self.add_edge(b, a, GameEdge::Connection(Connection::Door));
     }
@@ -151,17 +151,17 @@ impl Connection {
 
 fn astar_with_edges<N, E, FN, IN, FS, K>(
     graph: &StableDiGraph<N, E>,
-    start: NodeIndex,
+    start: MyIndex,
     is_goal: FN,
     mut edge_cost: FS,
     mut estimate: IN,
-) -> Option<Vec<(NodeIndex, E, NodeIndex)>>
+) -> Option<Vec<(MyIndex, E, MyIndex)>>
 where
     N: Clone,
     E: Clone,
     K: std::ops::Add<Output = K> + Ord + Copy + Default + Measure,
-    FN: Fn(NodeIndex) -> bool,
-    IN: FnMut(NodeIndex) -> K,
+    FN: Fn(MyIndex) -> bool,
+    IN: FnMut(MyIndex) -> K,
     FS: FnMut(&E) -> K,
 {
     if let Some((_, nodes)) = astar(
@@ -187,14 +187,14 @@ where
     }
 }
 
-fn source_nodes<N, E>(graph: &StableDiGraph<N, E>) -> Vec<NodeIndex> {
+fn source_nodes<N, E>(graph: &StableDiGraph<N, E>) -> Vec<MyIndex> {
     graph
         .node_indices()
         .filter(|&n| graph.neighbors_directed(n, Direction::Incoming).count() == 0)
         .collect()
 }
 
-fn terminal_nodes<N, E>(graph: &StableDiGraph<N, E>) -> Vec<NodeIndex> {
+fn terminal_nodes<N, E>(graph: &StableDiGraph<N, E>) -> Vec<MyIndex> {
     graph
         .node_indices()
         .filter(|&n| {
