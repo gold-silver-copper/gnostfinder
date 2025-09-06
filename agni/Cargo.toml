@@ -4,16 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-#hashbrown = "0.16.0"
+
 
 petgraph = "0.8.2"
-
-
-[dev-dependencies]
-criterion = { version = "0.5", features = ["html_reports"] }
 hashbrown = "0.16"
 rustc-hash = "2.1"
-
-[[bench]]
-name = "bench"
-harness = false
