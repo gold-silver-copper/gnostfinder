@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::*;
 
 use ratatui::layout::{Constraint, Direction, Layout};
