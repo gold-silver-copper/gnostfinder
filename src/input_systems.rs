@@ -16,11 +16,46 @@ pub enum InputState {
     Movement,
 }
 
+pub enum CardinalDirection {
+    North,
+    South,
+    East,
+    West,
+}
+
+pub enum GameEvent {
+    Move(Subject, CardinalDirection),
+}
+
 impl GameState {
+    fn handle_game_events(&mut self) {
+        while let Some(event) = self.event_queue.pop() {
+            match event {
+                GameEvent::Move(subj, dir) => self.handle_move_event(subj, dir),
+            }
+        }
+    }
+    fn handle_move_event(&mut self, subj: Subject, dir: CardinalDirection) {
+        if let Some(subj_thing) = self.thing_graph.node_weight(subj) {
+
+            // if subj_thing.
+        }
+    }
     fn handle_main_input(&mut self, my_input: LastInput) {
+        let p_id = self.player_id.clone();
         match my_input {
-            LastInput::Down => (),
-            LastInput::Up => (),
+            LastInput::Down => self
+                .event_queue
+                .push(GameEvent::Move(p_id, CardinalDirection::South)),
+            LastInput::Up => self
+                .event_queue
+                .push(GameEvent::Move(p_id, CardinalDirection::North)),
+            LastInput::Left => self
+                .event_queue
+                .push(GameEvent::Move(p_id, CardinalDirection::West)),
+            LastInput::Right => self
+                .event_queue
+                .push(GameEvent::Move(p_id, CardinalDirection::East)),
             LastInput::Select => (),
             LastInput::Back => {
                 panic!("aaa");

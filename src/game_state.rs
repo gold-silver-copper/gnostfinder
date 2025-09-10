@@ -15,6 +15,8 @@ pub struct Coord {
 }
 
 pub type MyIndex = NodeIndex<u32>;
+pub type Subject = MyIndex;
+pub type Object = MyIndex;
 // Menu structure
 #[derive(Resource)]
 pub struct GameState {
@@ -22,6 +24,7 @@ pub struct GameState {
     pub player_id: MyIndex,
     pub thing_graph: ThingGraph,
     pub coord_map: FxHashMap<Coord, MyIndex>,
+    pub event_queue: Vec<GameEvent>,
 }
 
 impl GameState {
@@ -31,6 +34,7 @@ impl GameState {
             player_id: MyIndex::new(0),
             thing_graph: ThingGraph::new(),
             coord_map: FxHashMap::default(),
+            event_queue: Vec::new(),
         };
         gs.init_world();
         gs
