@@ -22,6 +22,8 @@ use thing_graph::*;
 mod sentence_former;
 use bevy::platform::collections::HashSet;
 use english::*;
+mod bfo;
+pub use bfo::*;
 
 use rustc_hash::FxHashMap;
 use sentence_former::*;

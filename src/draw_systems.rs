@@ -65,7 +65,7 @@ fn draw_world(frame: &mut Frame<'_>, layout: Rect, game_state: &Res<GameState>) 
             if let Some(_node_index) = game_state.coord_map.get(&current_coord) {
                 grid_string.push('@'); // Draw something from the map
             } else {
-                grid_string.push('.'); // Draw empty floor
+                grid_string.push('木'); // Draw empty floor
             }
             grid_string.push(' '); // Add a space for better readability
         }
