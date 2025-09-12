@@ -13,15 +13,37 @@ mod input_systems;
 use input_systems::*;
 mod game_state;
 use game_state::*;
-
+//mod character_sheet;
+//use character_sheet::*;
+mod thing;
+mod thing_graph;
 use std::fmt;
-
+use thing_graph::*;
+mod sentence_former;
 use bevy::platform::collections::HashSet;
 use english::*;
+mod bfo;
+pub use bfo::*;
 
 use rustc_hash::FxHashMap;
+use sentence_former::*;
 
+enum Desu {
+    Hello,
+    Bye(What),
+    Zzzz,
+    Okay(What),
+}
+enum What {
+    Blah,
+    Nyaa,
+}
+
+use thing::*;
 fn main() {
+    println!("Size of Inner    : {} bytes", size_of::<What>());
+    println!("Size of Outer    : {} bytes", size_of::<Desu>());
+
     let mut app = App::new();
 
     app.insert_resource(GameState::new())

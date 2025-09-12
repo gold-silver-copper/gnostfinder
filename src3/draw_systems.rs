@@ -62,12 +62,16 @@ fn draw_world(frame: &mut Frame<'_>, layout: Rect, game_state: &Res<GameState>) 
         for x in 0..10 {
             let current_coord = Coord { x, y };
 
-            grid_string.push('.');
+            if let Some(_node_index) = game_state.coord_map.get(&current_coord) {
+                grid_string.push('@'); // Draw something from the map
+            } else {
+                grid_string.push('木'); // Draw empty floor
+            }
             grid_string.push(' '); // Add a space for better readability
         }
         sidebar_text.push(Line::from(grid_string));
     }
-    let player_name = "blah";
+    let player_name = game_state.thing_graph[game_state.player_id].name();
 
     let sidebar = Paragraph::new(sidebar_text)
         .block(Block::default().title(player_name).borders(Borders::ALL))
@@ -75,6 +79,25 @@ fn draw_world(frame: &mut Frame<'_>, layout: Rect, game_state: &Res<GameState>) 
     frame.render_widget(sidebar, layout);
 }
 
+fn draw_sidebar(frame: &mut Frame<'_>, layout: Rect, game_state: &Res<GameState>) {
+    let desc_text = game_state.describe_player_location();
+
+    // Event / text feed
+    let event_text = vec![Line::from(desc_text), Line::from("BLAH BLAH")];
+    let events = Paragraph::new(event_text)
+        .block(Block::default().title("Events").borders(Borders::ALL))
+        .wrap(Wrap { trim: true });
+    frame.render_widget(events, layout);
+}
+
+fn draw_commands(frame: &mut Frame<'_>, layout: Rect, game_state: &Res<GameState>) {
+    // Command bar
+    let commands =
+        Paragraph::new("Commands: [a] Attack  [d] Defend  [f] Flee  [i] Inventory  [q] Quit")
+            .style(Style::default().fg(Color::Yellow))
+            .block(Block::default().borders(Borders::ALL).title("Actions"));
+    frame.render_widget(commands, layout);
+}
 /// Screen: RPG World
 fn draw_rpg_screen(frame: &mut Frame<'_>, game_state: &Res<GameState>) {
     let area = frame.area();
@@ -100,8 +123,8 @@ fn draw_rpg_screen(frame: &mut Frame<'_>, game_state: &Res<GameState>) {
         .split(vertical_layout[0]);
 
     draw_world(frame, horizontal_layout[0], game_state);
-    // draw_sidebar(frame, horizontal_layout[1], game_state);
-    //  draw_commands(frame, vertical_layout[1], game_state);
+    draw_sidebar(frame, horizontal_layout[1], game_state);
+    draw_commands(frame, vertical_layout[1], game_state);
 }
 
 fn get_frame_area(mut context: ResMut<RatatuiContext>, game_state: Res<GameState>) {

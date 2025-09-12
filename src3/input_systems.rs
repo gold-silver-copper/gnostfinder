@@ -35,7 +35,12 @@ impl GameState {
             }
         }
     }
-    fn handle_move_event(&mut self, subj: Subject, dir: CardinalDirection) {}
+    fn handle_move_event(&mut self, subj: Subject, dir: CardinalDirection) {
+        if let Some(subj_thing) = self.thing_graph.node_weight(subj) {
+
+            // if subj_thing.
+        }
+    }
     fn handle_main_input(&mut self, my_input: LastInput) {
         let p_id = self.player_id.clone();
         match my_input {
